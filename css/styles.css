@@ -1,0 +1,1232 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+   ========================================= */
+
+:root {
+    --bg: #f3f7f4;
+    --surface: #dde9e1;
+    --accent: #1f5c4a;
+    --accent-light: #8fb7a6;
+    --text: #22322b;
+    --white: #ffffff;
+    --heading-font: Georgia, "Times New Roman", serif;
+    --body-font: Arial, Helvetica, sans-serif;
+}
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    font-family: var(--body-font);
+    background: var(--bg);
+    color: var(--text);
+}
+
+
+/* =========================================
+   PORTADA
+   ========================================= */
+
+.hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    overflow: hidden;
+    background-image: url("https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1600&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
+}
+
+
+/* =========================================
+   OSCURECER LA FOTOGRAFÍA
+   ========================================= */
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55) );
+}
+
+
+/* =========================================
+   CONTENIDO
+   ========================================= */
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    color: var(--white);
+    animation: aparecer 1.2s ease forwards;
+}
+
+
+/* =========================================
+   PEQUEÑO TÍTULO SUPERIOR
+   ========================================= */
+
+.eyebrow {
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+}
+
+
+/* =========================================
+   NOMBRES
+   ========================================= */
+
+h1 {
+    font-family: var(--heading-font);
+    font-size: clamp(3rem, 9vw, 6rem);
+    font-weight: normal;
+    line-height: 1.05;
+    margin-bottom: 25px;
+}
+
+
+/* =========================================
+   FECHA
+   ========================================= */
+
+.hero-date {
+    font-size: 1.15rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+
+.hero-location {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+
+/* =========================================
+   FRASE
+   ========================================= */
+
+.hero-phrase {
+    max-width: 600px;
+    margin: 35px auto;
+    font-family: var(--heading-font);
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   INVITACIÓN / PASES
+   ========================================= */
+
+.invitation-badge {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+
+/* =========================================
+   INDICADOR PARA DESLIZAR
+   ========================================= */
+
+.scroll-indicator {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    font-size: 0.75rem;
+    text-decoration: none;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+
+.arrow {
+    font-size: 1.8rem;
+    line-height: 1;
+    animation: bajar 1.5s infinite;
+}
+
+.arrow {
+    font-size: 1.8rem;
+    line-height: 1;
+    animation: bajar 1.5s infinite;
+}
+
+
+/* =========================================
+   ANIMACIONES
+   ========================================= */
+
+@keyframes aparecer {
+
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes bajar {
+
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(6px);
+    }
+}
+
+
+/* =========================================
+   CELULARES
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    .hero {
+        padding: 30px 20px;
+    }
+
+
+    h1 {
+        font-size: clamp(2.8rem, 15vw, 4rem);
+    }
+
+
+    .hero-date {
+        font-size: 1rem;
+    }
+
+
+    .hero-location {
+        font-size: 0.9rem;
+    }
+
+
+    .hero-phrase {
+        font-size: 1rem;
+        margin: 28px auto;
+    }
+}
+/* =========================================
+   CUENTA REGRESIVA
+   ========================================= */
+
+.countdown-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    background: var(--bg);
+    text-align: center;
+}
+
+
+.section-content {
+    width: 100%;
+    max-width: 900px;
+}
+
+
+.section-label {
+    margin-bottom: 15px;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+}
+
+
+.countdown-section h2 {
+    font-family: var(--heading-font);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+
+.divider {
+    margin: 25px 0 40px;
+    color: var(--accent-light);
+    font-size: 1.5rem;
+}
+
+
+/* =========================================
+   TARJETAS DEL CONTADOR
+   ========================================= */
+
+.countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    max-width: 700px;
+    margin: 0 auto 35px;
+}
+
+
+.countdown-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    padding: 20px 10px;
+    border-radius: 16px;
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 12px 30px rgba(31, 92, 74, 0.18);
+}
+
+
+    .countdown-card span {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        font-weight: bold;
+        line-height: 1;
+    }
+
+
+    .countdown-card small {
+        margin-top: 12px;
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+
+/* =========================================
+   TEXTO INFERIOR
+   ========================================= */
+
+.countdown-status {
+    color: var(--text);
+    font-size: 0.9rem;
+    opacity: 0.65;
+}
+
+
+.countdown-date {
+    margin-top: 5px;
+    color: var(--accent);
+    font-weight: bold;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    .countdown {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 400px;
+    }
+
+
+    .countdown-card {
+        min-height: 120px;
+    }
+}
+/* =========================================
+   SECCIÓN DEL LUGAR
+   ========================================= */
+
+.venue-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 90px 24px;
+    background: var(--surface);
+    text-align: center;
+}
+
+
+/* =========================================
+   TARJETA
+   ========================================= */
+
+.venue-card {
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 45px 30px;
+    border-radius: 24px;
+    background: var(--bg);
+    box-shadow: 0 15px 40px rgba(34, 50, 43, 0.12);
+}
+
+
+/* =========================================
+   ICONO
+   ========================================= */
+
+.venue-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 2rem;
+}
+
+
+    .venue-icon span {
+        transform: translateY(-2px);
+    }
+
+
+/* =========================================
+   NOMBRE DEL LUGAR
+   ========================================= */
+
+.venue-card h3 {
+    margin-bottom: 15px;
+    font-family: var(--heading-font);
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: normal;
+}
+
+
+/* =========================================
+   DIRECCIÓN
+   ========================================= */
+
+.venue-address {
+    color: var(--accent);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   DESCRIPCIÓN
+   ========================================= */
+
+.venue-description {
+    max-width: 500px;
+    margin: 25px auto;
+    color: var(--text);
+    line-height: 1.7;
+    opacity: 0.75;
+}
+
+
+/* =========================================
+   BOTÓN
+   ========================================= */
+
+.map-button {
+    display: inline-block;
+    padding: 13px 25px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+    .map-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(31, 92, 74, 0.25);
+    }
+
+
+/* =========================================
+   CELULAR
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    .venue-section {
+        padding: 70px 20px;
+    }
+
+
+    .venue-card {
+        padding: 35px 22px;
+    }
+}
+/* =========================================
+   NUESTRA HISTORIA
+   ========================================= */
+
+.story-section {
+    padding: 100px 24px;
+    background: var(--bg);
+    text-align: center;
+}
+
+
+    .story-section .section-content {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+
+/* =========================================
+   ELEMENTO DE HISTORIA
+   ========================================= */
+
+.story-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+    margin-top: 80px;
+    text-align: left;
+}
+
+
+.story-reverse {
+    direction: rtl;
+}
+
+
+    .story-reverse .story-text {
+        direction: ltr;
+    }
+
+
+/* =========================================
+   FOTOGRAFÍAS
+   ========================================= */
+
+.story-image {
+    overflow: hidden;
+    border-radius: 24px;
+    aspect-ratio: 4 / 5;
+    box-shadow: 0 15px 40px rgba(34, 50, 43, 0.12);
+}
+
+
+    .story-image img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+
+    .story-image:hover img {
+        transform: scale(1.05);
+    }
+
+
+/* =========================================
+   TEXTO
+   ========================================= */
+
+.story-text {
+    max-width: 400px;
+}
+
+
+.story-year {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+}
+
+
+.story-text h3 {
+    margin-bottom: 18px;
+    font-family: var(--heading-font);
+    font-size: 2rem;
+    font-weight: normal;
+}
+
+
+.story-text p {
+    color: var(--text);
+    line-height: 1.8;
+    opacity: 0.72;
+}
+
+
+/* =========================================
+   CELULAR
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .story-section {
+        padding: 80px 20px;
+    }
+
+
+    .story-item,
+    .story-reverse {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        margin-top: 60px;
+        direction: ltr;
+        text-align: center;
+    }
+
+
+    .story-image {
+        width: 100%;
+        max-width: 450px;
+    }
+
+
+    .story-text {
+        max-width: 500px;
+    }
+
+
+        .story-text h3 {
+            font-size: 1.8rem;
+        }
+}
+/* =========================================
+   DETALLES DEL EVENTO
+   ========================================= */
+
+.event-section {
+    padding: 100px 24px;
+    background: var(--surface);
+    text-align: center;
+}
+
+
+    .event-section .section-content {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+
+/* =========================================
+   GRID
+   ========================================= */
+
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin-top: 20px;
+}
+
+
+/* =========================================
+   TARJETA
+   ========================================= */
+
+.event-card {
+    padding: 40px 25px;
+    border-radius: 24px;
+    background: var(--bg);
+    box-shadow: 0 12px 35px rgba(34, 50, 43, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+    .event-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 45px rgba(34, 50, 43, 0.14);
+    }
+
+
+/* =========================================
+   ICONO
+   ========================================= */
+
+.event-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 1.5rem;
+}
+
+
+/* =========================================
+   CONTENIDO
+   ========================================= */
+
+.event-label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+
+.event-card h3 {
+    margin-bottom: 10px;
+    font-family: var(--heading-font);
+    font-size: 2rem;
+    font-weight: normal;
+}
+
+
+.event-card p {
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+
+.event-card small {
+    display: block;
+    color: var(--text);
+    line-height: 1.5;
+    opacity: 0.6;
+}
+
+
+/* =========================================
+   CELULAR
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .event-section {
+        padding: 80px 20px;
+    }
+
+
+    .event-grid {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+/* =========================================
+   MAPA
+   ========================================= */
+
+.map-section {
+    padding: 100px 24px;
+    background: var(--bg);
+    text-align: center;
+}
+
+
+    .map-section .section-content {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+
+/* =========================================
+   CONTENEDOR DEL MAPA
+   ========================================= */
+
+.map-wrapper {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    margin-top: 20px;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(34, 50, 43, 0.12);
+}
+
+
+    .map-wrapper iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+
+/* =========================================
+   INFORMACIÓN
+   ========================================= */
+
+.map-info {
+    margin-top: 30px;
+}
+
+
+    .map-info h3 {
+        margin-bottom: 10px;
+        font-family: var(--heading-font);
+        font-size: 2rem;
+        font-weight: normal;
+    }
+
+
+    .map-info p {
+        margin-bottom: 20px;
+        line-height: 1.7;
+        opacity: 0.7;
+    }
+
+
+/* =========================================
+   CELULAR
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    .map-section {
+        padding: 80px 20px;
+    }
+
+
+    .map-wrapper {
+        height: 350px;
+        border-radius: 18px;
+    }
+}
+/* =========================================
+   PANTALLA DE APERTURA
+   ========================================= */
+
+.opening-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: linear-gradient( rgba(31, 92, 74, 0.82), rgba(20, 55, 45, 0.92) );
+    color: white;
+    text-align: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+
+.opening-content {
+    width: 100%;
+    max-width: 600px;
+    animation: aperturaEntrada 1.2s ease forwards;
+}
+
+
+.opening-label {
+    margin-bottom: 25px;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+
+.opening-content h1 {
+    margin-bottom: 20px;
+    font-family: var(--heading-font);
+    font-size: clamp(3rem, 12vw, 6rem);
+    font-weight: normal;
+    line-height: 1;
+}
+
+
+    .opening-content h1 span {
+        display: block;
+        margin: 8px 0;
+        font-family: cursive;
+        font-size: 0.6em;
+    }
+
+
+.opening-date {
+    font-size: 1rem;
+    letter-spacing: 0.25em;
+}
+
+
+.opening-message {
+    max-width: 420px;
+    margin: 35px auto;
+    font-family: var(--heading-font);
+    font-size: 1.1rem;
+    font-style: italic;
+    line-height: 1.7;
+    opacity: 0.85;
+}
+
+
+/* =========================================
+   BOTÓN
+   ========================================= */
+
+.open-button {
+    padding: 15px 30px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+
+    .open-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+
+/* =========================================
+   ESTADO CERRADO
+   ========================================= */
+
+.opening-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+
+@keyframes aperturaEntrada {
+
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* =========================================
+   GALERÍA
+   ========================================= */
+
+.gallery-section {
+    padding: 100px 24px;
+    background: var(--surface);
+    text-align: center;
+}
+
+
+    .gallery-section .section-content {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 220px;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+
+.gallery-item {
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+
+    .gallery-item:hover img {
+        transform: scale(1.06);
+    }
+
+
+.gallery-large {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+
+@media (max-width: 700px) {
+
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 180px;
+    }
+
+
+    .gallery-large {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
+}
+/* =========================================
+   CONFIRMACIÓN
+   ========================================= */
+
+.rsvp-section {
+    padding: 110px 24px;
+    background: var(--accent);
+    color: white;
+    text-align: center;
+}
+
+
+    .rsvp-section .section-label {
+        color: white;
+        opacity: 0.8;
+    }
+
+
+.rsvp-message {
+    max-width: 550px;
+    margin: 0 auto 30px;
+    line-height: 1.8;
+    opacity: 0.85;
+}
+
+
+.rsvp-button {
+    display: inline-block;
+    padding: 15px 30px;
+    border-radius: 999px;
+    background: white;
+    color: var(--accent);
+    font-weight: bold;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+
+    .rsvp-button:hover {
+        transform: translateY(-3px);
+    }
+/* =========================================
+   REGALOS
+   ========================================= */
+
+.gifts-section {
+    padding: 100px 24px;
+    background: var(--bg);
+    text-align: center;
+}
+
+
+    .gifts-section .section-content {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+
+.gifts-message {
+    max-width: 650px;
+    margin: 0 auto 40px;
+    line-height: 1.8;
+    opacity: 0.7;
+}
+
+
+.gift-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+
+.gift-card {
+    padding: 35px 25px;
+    border-radius: 24px;
+    background: var(--surface);
+}
+
+
+.gift-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+}
+
+
+.gift-card h3 {
+    margin-bottom: 8px;
+    font-family: var(--heading-font);
+    font-size: 1.7rem;
+    font-weight: normal;
+}
+
+
+.gift-card p {
+    margin-bottom: 20px;
+    opacity: 0.65;
+}
+
+
+.text-button {
+    color: var(--accent);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+
+@media (max-width: 600px) {
+
+    .gift-options {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================================
+   CIERRE
+   ========================================= */
+
+.closing-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    background: linear-gradient( rgba(20, 55, 45, 0.9), rgba(20, 55, 45, 0.95) );
+    color: white;
+    text-align: center;
+}
+
+
+.closing-content {
+    max-width: 700px;
+}
+
+
+.closing-small {
+    margin-bottom: 25px;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+
+.closing-content h2 {
+    font-family: var(--heading-font);
+    font-size: clamp(2.8rem, 9vw, 5rem);
+    font-weight: normal;
+}
+
+
+.closing-date {
+    margin-top: 20px;
+    letter-spacing: 0.25em;
+}
+
+
+.closing-symbol {
+    margin-top: 40px;
+    font-size: 2rem;
+}
+/* =========================================
+   ANIMACIONES AL HACER SCROLL
+   ========================================= */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+/* =========================================
+   ANIMACIÓN ESCALONADA
+   ========================================= */
+
+.reveal-child {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+
+.visible .reveal-child {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+    .visible .reveal-child:nth-child(1) {
+        transition-delay: 0.1s;
+    }
+
+
+    .visible .reveal-child:nth-child(2) {
+        transition-delay: 0.25s;
+    }
+
+
+    .visible .reveal-child:nth-child(3) {
+        transition-delay: 0.4s;
+    }
