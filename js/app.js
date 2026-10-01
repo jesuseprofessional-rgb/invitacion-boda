@@ -49,9 +49,60 @@ const openInvitation =
     document.getElementById("open-invitation");
 
 
+const musicaBoda =
+    document.getElementById("musica-boda");
+
+const musicToggle =
+    document.getElementById("music-toggle");
+
+
 openInvitation.addEventListener("click", () => {
 
     openingScreen.classList.add("hidden");
+
+    musicaBoda.play()
+        .then(() => {
+
+            musicToggle.textContent = "♫";
+
+        })
+        .catch((error) => {
+
+            console.log(
+                "No se pudo iniciar la música:",
+                error
+            );
+
+        });
+
+});
+
+
+musicToggle.addEventListener("click", () => {
+
+    if (musicaBoda.paused) {
+
+        musicaBoda.play();
+
+        musicToggle.textContent = "♫";
+        musicToggle.classList.remove("paused");
+        musicToggle.setAttribute(
+            "aria-label",
+            "Pausar música"
+        );
+
+    } else {
+
+        musicaBoda.pause();
+
+        musicToggle.textContent = "♪";
+        musicToggle.classList.add("paused");
+        musicToggle.setAttribute(
+            "aria-label",
+            "Reproducir música"
+        );
+
+    }
 
 });
 
