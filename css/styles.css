@@ -9,8 +9,9 @@
     --accent-light: #8fb7a6;
     --text: #22322b;
     --white: #ffffff;
-    --heading-font: Georgia, "Times New Roman", serif;
-    --body-font: Arial, Helvetica, sans-serif;
+    --heading-font: "Cormorant Garamond", Georgia, serif;
+    --body-font: "Montserrat", Arial, Helvetica, sans-serif;
+    --script-font: "Parisienne", cursive;
 }
 
 
@@ -32,7 +33,6 @@ body {
     color: var(--text);
 }
 
-
 /* =========================================
    PORTADA
    ========================================= */
@@ -46,7 +46,7 @@ body {
     justify-content: center;
     padding: 40px 24px;
     overflow: hidden;
-    background-image: url("https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1600&auto=format&fit=crop");
+    background-image: url("https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1800&auto=format&fit=crop");
     background-size: cover;
     background-position: center;
 }
@@ -59,7 +59,33 @@ body {
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55) );
+    background: linear-gradient( to bottom, rgba(20, 55, 45, 0.20), rgba(20, 55, 45, 0.72) );
+}
+
+
+/* =========================================
+   DECORACIÓN
+   ========================================= */
+
+.hero::before,
+.hero::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+.hero::before {
+    top: -90px;
+    left: -90px;
+}
+
+.hero::after {
+    right: -90px;
+    bottom: -90px;
 }
 
 
@@ -71,7 +97,7 @@ body {
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 800px;
+    max-width: 850px;
     text-align: center;
     color: var(--white);
     animation: aparecer 1.2s ease forwards;
@@ -83,11 +109,12 @@ body {
    ========================================= */
 
 .eyebrow {
-    margin-bottom: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    letter-spacing: 0.25em;
+    margin-bottom: 24px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.35em;
     text-transform: uppercase;
+    opacity: 0.9;
 }
 
 
@@ -95,12 +122,14 @@ body {
    NOMBRES
    ========================================= */
 
-h1 {
-    font-family: var(--heading-font);
-    font-size: clamp(3rem, 9vw, 6rem);
-    font-weight: normal;
-    line-height: 1.05;
+.hero h1 {
     margin-bottom: 25px;
+    font-family: var(--heading-font);
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    text-shadow: 0 4px 25px rgba(0, 0, 0, 0.25);
 }
 
 
@@ -109,15 +138,18 @@ h1 {
    ========================================= */
 
 .hero-date {
-    font-size: 1.15rem;
-    font-weight: bold;
     margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
 }
 
 
 .hero-location {
-    font-size: 1rem;
-    opacity: 0.9;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    opacity: 0.85;
 }
 
 
@@ -127,27 +159,12 @@ h1 {
 
 .hero-phrase {
     max-width: 600px;
-    margin: 35px auto;
+    margin: 38px auto 0;
     font-family: var(--heading-font);
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     font-style: italic;
     line-height: 1.6;
-}
-
-
-/* =========================================
-   INVITACIÓN / PASES
-   ========================================= */
-
-.invitation-badge {
-    display: inline-block;
-    padding: 10px 20px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(8px);
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
+    opacity: 0.95;
 }
 
 
@@ -166,21 +183,17 @@ h1 {
     align-items: center;
     gap: 5px;
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     text-decoration: none;
-    opacity: 0.8;
+    opacity: 0.75;
     cursor: pointer;
 }
 
 
 .arrow {
-    font-size: 1.8rem;
-    line-height: 1;
-    animation: bajar 1.5s infinite;
-}
-
-.arrow {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
     line-height: 1;
     animation: bajar 1.5s infinite;
 }
@@ -227,26 +240,29 @@ h1 {
     }
 
 
-    h1 {
-        font-size: clamp(2.8rem, 15vw, 4rem);
-    }
+        .hero h1 {
+            font-size: clamp(3.2rem, 17vw, 5rem);
+            line-height: 0.88;
+        }
 
 
     .hero-date {
-        font-size: 1rem;
+        font-size: 0.72rem;
     }
 
 
     .hero-location {
-        font-size: 0.9rem;
+        font-size: 0.65rem;
     }
 
 
     .hero-phrase {
-        font-size: 1rem;
-        margin: 28px auto;
+        max-width: 320px;
+        font-size: 1.1rem;
+        margin-top: 30px;
     }
 }
+
 /* =========================================
    CUENTA REGRESIVA
    ========================================= */
@@ -757,88 +773,317 @@ h1 {
     }
 }
 /* =========================================
-   MAPA
+   UBICACIONES
    ========================================= */
 
-.map-section {
-    padding: 100px 24px;
+.locations-section {
+
+    padding: 110px 24px;
+
     background: var(--bg);
+
     text-align: center;
 }
 
 
-    .map-section .section-content {
-        max-width: 1000px;
-        margin: 0 auto;
-    }
+.locations-section .section-content {
 
+    max-width: 1100px;
 
-/* =========================================
-   CONTENEDOR DEL MAPA
-   ========================================= */
-
-.map-wrapper {
-    position: relative;
-    width: 100%;
-    height: 450px;
-    overflow: hidden;
-    margin-top: 20px;
-    border-radius: 24px;
-    box-shadow: 0 15px 40px rgba(34, 50, 43, 0.12);
+    margin: 0 auto;
 }
 
 
-    .map-wrapper iframe {
-        width: 100%;
-        height: 100%;
-        border: 0;
-    }
+/* =========================================
+   GRID DE UBICACIONES
+   ========================================= */
+
+.locations-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 30px;
+
+    margin-top: 20px;
+}
+
+
+/* =========================================
+   TARJETA
+   ========================================= */
+
+.location-card {
+
+    overflow: hidden;
+
+    border-radius: 28px;
+
+    background: var(--surface);
+
+    box-shadow:
+        0 18px 45px
+        rgba(34, 50, 43, 0.10);
+
+    text-align: left;
+
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+
+.location-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        0 25px 55px
+        rgba(34, 50, 43, 0.15);
+}
+
+
+/* =========================================
+   ENCABEZADO
+   ========================================= */
+
+.location-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 22px 25px;
+
+    background: var(--surface);
+}
+
+
+.location-number {
+
+    color: var(--accent);
+
+    font-family: var(--heading-font);
+
+    font-size: 1.5rem;
+
+    font-weight: 500;
+}
+
+
+.location-type {
+
+    color: var(--accent);
+
+    font-size: 0.65rem;
+
+    font-weight: 600;
+
+    letter-spacing: 0.2em;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================
+   MAPA
+   ========================================= */
+
+.location-map {
+
+    width: 100%;
+
+    height: 330px;
+
+    overflow: hidden;
+}
+
+
+.location-map iframe {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    border: 0;
+}
 
 
 /* =========================================
    INFORMACIÓN
    ========================================= */
 
-.map-info {
-    margin-top: 30px;
+.location-info {
+
+    padding: 35px 30px 38px;
+
+    text-align: center;
+
+    background: var(--bg);
 }
 
 
-    .map-info h3 {
-        margin-bottom: 10px;
-        font-family: var(--heading-font);
-        font-size: 2rem;
-        font-weight: normal;
-    }
+.location-label {
+
+    margin-bottom: 8px;
+
+    color: var(--accent);
+
+    font-size: 0.65rem;
+
+    font-weight: 600;
+
+    letter-spacing: 0.25em;
+
+    text-transform: uppercase;
+}
 
 
-    .map-info p {
-        margin-bottom: 20px;
-        line-height: 1.7;
-        opacity: 0.7;
-    }
+.location-info h3 {
+
+    margin-bottom: 12px;
+
+    font-family: var(--heading-font);
+
+    font-size: 2.2rem;
+
+    font-weight: 400;
+
+    line-height: 1.1;
+}
+
+
+.location-time {
+
+    margin-bottom: 5px;
+
+    color: var(--accent);
+
+    font-size: 0.9rem;
+
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+}
+
+
+.location-description {
+
+    margin-bottom: 25px;
+
+    font-size: 0.8rem;
+
+    opacity: 0.6;
+}
+
+
+/* =========================================
+   BOTÓN
+   ========================================= */
+
+.location-info .map-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 13px 22px;
+
+    border-radius: 999px;
+
+    background: var(--accent);
+
+    color: white;
+
+    font-size: 0.7rem;
+
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+.location-info .map-button:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(31, 92, 74, 0.25);
+}
+
+
+.location-info .map-button span {
+
+    font-size: 0.9rem;
+}
 
 
 /* =========================================
    CELULAR
    ========================================= */
 
-@media (max-width: 600px) {
+@media (max-width: 750px) {
 
-    .map-section {
+    .locations-section {
+
         padding: 80px 20px;
+
     }
 
 
-    .map-wrapper {
-        height: 350px;
-        border-radius: 18px;
+    .locations-grid {
+
+        grid-template-columns: 1fr;
+
+        gap: 25px;
+
     }
+
+
+    .location-map {
+
+        height: 300px;
+
+    }
+
+
+    .location-info {
+
+        padding:
+            30px 22px 35px;
+
+    }
+
+
+    .location-info h3 {
+
+        font-size: 2rem;
+
+    }
+
 }
 /* =========================================
    PANTALLA DE APERTURA
    ========================================= */
-
 .opening-screen {
     position: fixed;
     inset: 0;
@@ -847,60 +1092,210 @@ h1 {
     align-items: center;
     justify-content: center;
     padding: 30px;
-    background: linear-gradient( rgba(31, 92, 74, 0.82), rgba(20, 55, 45, 0.92) );
+    overflow: hidden;
+    background: radial-gradient( circle at center, rgba(60, 105, 87, 0.35), transparent 55% ), linear-gradient( 135deg, #102f27, #183f34 50%, #0d2922 );
     color: white;
     text-align: center;
-    transition: opacity 0.8s ease, visibility 0.8s ease;
+    transition: opacity 1s ease, visibility 1s ease, transform 1s ease;
 }
 
+
+/* =========================================
+   DECORACIÓN CIRCULAR
+   ========================================= */
+
+.opening-decoration {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+
+    .opening-decoration::before {
+        content: "";
+        position: absolute;
+        inset: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+    }
+
+
+.opening-decoration-top {
+    top: -260px;
+    left: -180px;
+    animation: decoracionFlotar 8s ease-in-out infinite;
+}
+
+
+.opening-decoration-bottom {
+    right: -180px;
+    bottom: -260px;
+    animation: decoracionFlotar 10s ease-in-out infinite reverse;
+}
+
+
+/* =========================================
+   CONTENIDO
+   ========================================= */
 
 .opening-content {
+    position: relative;
+    z-index: 2;
     width: 100%;
-    max-width: 600px;
-    animation: aperturaEntrada 1.2s ease forwards;
+    max-width: 650px;
+    animation: aperturaEntrada 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+
+/* =========================================
+   PEQUEÑO TEXTO SUPERIOR
+   ========================================= */
 
 .opening-label {
-    margin-bottom: 25px;
-    font-size: 0.8rem;
-    letter-spacing: 0.3em;
+    margin-bottom: 28px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.35em;
     text-transform: uppercase;
-    opacity: 0.8;
+    opacity: 0;
+    animation: aparecerTexto 1s ease 0.3s forwards;
 }
 
+
+/* =========================================
+   SÍMBOLO
+   ========================================= */
+
+.opening-symbol {
+    margin-bottom: 28px;
+    font-family: var(--script-font);
+    font-size: 3.2rem;
+    font-weight: normal;
+    opacity: 0;
+    animation: simboloEntrada 1.2s ease 0.5s forwards;
+}
+
+
+/* =========================================
+   VERSÍCULO
+   ========================================= */
+
+.opening-verse {
+    max-width: 520px;
+    margin: 0 auto;
+    font-family: var(--heading-font);
+    opacity: 0;
+    animation: aparecerTexto 1.2s ease 0.7s forwards;
+}
+
+
+    .opening-verse p {
+        font-size: clamp( 1.25rem, 3vw, 1.65rem );
+        font-style: italic;
+        font-weight: 400;
+        line-height: 1.55;
+        letter-spacing: 0.01em;
+    }
+
+
+    .opening-verse span {
+        display: block;
+        margin-top: 18px;
+        font-family: var(--body-font);
+        font-size: 0.65rem;
+        font-style: normal;
+        font-weight: 500;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        opacity: 0.7;
+    }
+
+
+/* =========================================
+   DIVISOR
+   ========================================= */
+
+.opening-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 30px auto;
+    width: 180px;
+    opacity: 0;
+    animation: aparecerTexto 1s ease 1s forwards;
+}
+
+
+    .opening-divider span {
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+
+    .opening-divider i {
+        font-size: 0.7rem;
+        font-style: normal;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+
+/* =========================================
+   TEXTO DE INVITACIÓN
+   ========================================= */
+
+.opening-invitation {
+    margin-bottom: 16px;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: aparecerTexto 1s ease 1.15s forwards;
+}
+
+
+/* =========================================
+   NOMBRES
+   ========================================= */
 
 .opening-content h1 {
     margin-bottom: 20px;
     font-family: var(--heading-font);
-    font-size: clamp(3rem, 12vw, 6rem);
-    font-weight: normal;
-    line-height: 1;
+    font-size: clamp( 3rem, 9vw, 5.5rem );
+    font-weight: 400;
+    line-height: 0.88;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    animation: nombresEntrada 1.3s cubic-bezier(0.22, 1, 0.36, 1) 1.25s forwards;
 }
 
 
     .opening-content h1 span {
         display: block;
-        margin: 8px 0;
-        font-family: cursive;
-        font-size: 0.6em;
+        margin: 12px 0;
+        font-family: var(--script-font);
+        font-size: 0.65em;
+        line-height: 0.8;
+        opacity: 0.85;
     }
 
 
+/* =========================================
+   FECHA
+   ========================================= */
+
 .opening-date {
-    font-size: 1rem;
-    letter-spacing: 0.25em;
-}
-
-
-.opening-message {
-    max-width: 420px;
-    margin: 35px auto;
-    font-family: var(--heading-font);
-    font-size: 1.1rem;
-    font-style: italic;
-    line-height: 1.7;
-    opacity: 0.85;
+    margin-bottom: 32px;
+    font-family: var(--body-font);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    opacity: 0;
+    animation: aparecerTexto 1s ease 1.5s forwards;
 }
 
 
@@ -909,37 +1304,63 @@ h1 {
    ========================================= */
 
 .open-button {
-    padding: 15px 30px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    min-width: 190px;
+    padding: 14px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     color: white;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: bold;
-    letter-spacing: 0.05em;
+    font-family: var(--body-font);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     cursor: pointer;
     backdrop-filter: blur(8px);
-    transition: background 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    animation: aparecerTexto 1s ease 1.7s forwards;
+    transition: background 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
 }
 
 
-    .open-button:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
+    .open-button i {
+        font-size: 1rem;
+        font-style: normal;
+        transition: transform 0.35s ease;
     }
 
 
+    .open-button:hover {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.8);
+        transform: translateY(-3px);
+    }
+
+
+        .open-button:hover i {
+            transform: translateX(5px);
+        }
+
+
 /* =========================================
-   ESTADO CERRADO
+   ANIMACIÓN AL ABRIR
    ========================================= */
 
 .opening-screen.hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    transform: scale(1.04);
 }
 
+
+/* =========================================
+   ANIMACIONES DE ENTRADA
+   ========================================= */
 
 @keyframes aperturaEntrada {
 
@@ -953,10 +1374,146 @@ h1 {
         transform: translateY(0);
     }
 }
+
+
+@keyframes aparecerTexto {
+
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes simboloEntrada {
+
+    from {
+        opacity: 0;
+        transform: scale(0.5) rotate(-15deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+
+@keyframes nombresEntrada {
+
+    from {
+        opacity: 0;
+        transform: translateY(25px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+@keyframes decoracionFlotar {
+
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(15px, 10px) rotate(5deg);
+    }
+}
+
+
+/* =========================================
+   CELULAR
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    .opening-screen {
+        padding: 25px 20px;
+    }
+
+
+    .opening-decoration {
+        width: 300px;
+        height: 300px;
+    }
+
+
+    .opening-decoration-top {
+        top: -190px;
+        left: -150px;
+    }
+
+
+    .opening-decoration-bottom {
+        right: -150px;
+        bottom: -190px;
+    }
+
+
+    .opening-label {
+        margin-bottom: 20px;
+        font-size: 0.58rem;
+        letter-spacing: 0.25em;
+    }
+
+
+    .opening-symbol {
+        margin-bottom: 20px;
+        font-size: 2.6rem;
+    }
+
+
+    .opening-verse {
+        max-width: 330px;
+    }
+
+
+        .opening-verse p {
+            font-size: 1.15rem;
+            line-height: 1.5;
+        }
+
+
+    .opening-divider {
+        margin: 24px auto;
+    }
+
+
+    .opening-invitation {
+        font-size: 0.55rem;
+        letter-spacing: 0.22em;
+    }
+
+
+    .opening-content h1 {
+        font-size: clamp( 2.7rem, 14vw, 4rem );
+    }
+
+
+    .opening-date {
+        font-size: 0.58rem;
+        letter-spacing: 0.22em;
+    }
+
+
+    .open-button {
+        min-width: 180px;
+        padding: 13px 20px;
+        font-size: 0.6rem;
+    }
+}
 /* =========================================
    GALERÍA
    ========================================= */
-
 .gallery-section {
     padding: 100px 24px;
     background: var(--surface);

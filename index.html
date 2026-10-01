@@ -1,50 +1,117 @@
 <!DOCTYPE html>
+
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Alejandro & Valeria | Nuestra boda</title>
+    ```
+    <title>Eric Hernández Vargas & Yolanda Álvarez Bonilla | Nuestra boda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&family=Parisienne&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    ```
+
 </head>
 
 <body>
-    <!-- PANTALLA DE APERTURA -->
+
+
+    <!-- =========================================
+         PANTALLA DE APERTURA
+         ========================================= -->
+
     <div id="opening-screen" class="opening-screen">
+
+        <div class="opening-decoration opening-decoration-top"></div>
 
         <div class="opening-content">
 
             <p class="opening-label">
-                Estás invitado a
+                Con alegría en nuestros corazones
             </p>
 
-            <h1>
-                Alejandro
-                <span>&</span>
-                Valeria
+
+            <div class="opening-symbol">
+                ♡
+            </div>
+
+
+            <div class="opening-verse">
+
+                <p>
+                    Si nos amamos unos a otros,
+                    Dios permanece en nosotros,
+                    y su amor se ha perfeccionado
+                    en nosotros.
+                </p>
+
+                <span>
+                    1 Juan 4:12
+                </span>
+
+            </div>
+
+
+            <div class="opening-divider">
+                <span></span>
+                <i>✦</i>
+                <span></span>
+            </div>
+
+
+            <p class="opening-invitation">
+                Estás invitado a celebrar
+            </p>
+
+
+            <h1 id="opening-novios">
+
+                Eric Hernández Vargas
+
+                <span>&amp;</span>
+
+                Yolanda Álvarez Bonilla
+
             </h1>
 
-            <p class="opening-date">
-                21 · 11 · 2026
+
+            <p class="opening-date" id="opening-fecha">
+                15 · 12 · 2026
             </p>
 
-            <p class="opening-message">
-                Acompáñanos a celebrar el comienzo
-                de nuestra nueva historia.
-            </p>
 
-            <button id="open-invitation" class="open-button">
-                Abrir invitación
+            <button id="open-invitation"
+                    class="open-button">
+
+                <span>
+                    Abrir invitación
+                </span>
+
+                <i>
+                    →
+                </i>
+
             </button>
 
         </div>
 
+
+        <div class="opening-decoration opening-decoration-bottom"></div>
+
     </div>
+
+
     <main>
 
-        <!-- PORTADA -->
+        <!-- =========================================
+         PORTADA
+         ========================================= -->
+
         <section class="hero">
 
             <div class="hero-overlay"></div>
@@ -56,24 +123,20 @@
                 </p>
 
                 <h1 id="novios">
-                    Alejandro & Valeria
+                    Eric Hernández Vargas & Yolanda Álvarez Bonilla
                 </h1>
 
                 <p class="hero-date" id="fecha">
-                    Sábado, 21 de noviembre de 2026
+                    martes, 15 de diciembre de 2026
                 </p>
 
-                <p class="hero-location" id="lugar">
-                    Hacienda San Miguel · Valle de Bravo
+                <p class="hero-location">
+                    Iglesia Santiago Apóstol · Salón República
                 </p>
 
                 <p class="hero-phrase">
                     “Dos caminos, una historia y toda una vida por delante.”
                 </p>
-
-                <div class="invitation-badge" id="invitados">
-                    Familia Ramírez Ortega · 2 pases
-                </div>
 
             </div>
 
@@ -83,533 +146,709 @@
             </a>
 
         </section>
-        <!-- CUENTA REGRESIVA -->
 
 
-        <<section id="countdown" class="countdown-section reveal">
-    <div class="section-content">
+        <!-- =========================================
+         CUENTA REGRESIVA
+         ========================================= -->
 
-        <p class="section-label">
-            para el gran día
-        </p>
+        <section id="countdown" class="countdown-section reveal">
 
-        <h2>
-            Falta poco para vernos
-        </h2>
+            <div class="section-content">
 
-        <div class="divider">
-            ✦
-        </div>
+                <p class="section-label">
+                    para el gran día
+                </p>
 
-        <div class="countdown">
+                <h2>
+                    Falta poco para vernos
+                </h2>
 
-            <div class="countdown-card">
-                <span id="dias">0</span>
-                <small>Días</small>
+                <div class="divider">
+                    ✦
+                </div>
+
+                <div class="countdown">
+
+                    <div class="countdown-card">
+                        <span id="dias">0</span>
+                        <small>Días</small>
+                    </div>
+
+                    <div class="countdown-card">
+                        <span id="horas">0</span>
+                        <small>Horas</small>
+                    </div>
+
+                    <div class="countdown-card">
+                        <span id="minutos">0</span>
+                        <small>Min</small>
+                    </div>
+
+                    <div class="countdown-card">
+                        <span id="segundos">0</span>
+                        <small>Seg</small>
+                    </div>
+
+                </div>
+
+                <p class="countdown-status">
+                    Cuenta regresiva para
+                </p>
+
+                <p class="countdown-date" id="fecha-countdown">
+                    martes, 15 de diciembre de 2026
+                </p>
+
             </div>
 
-            <div class="countdown-card">
-                <span id="horas">0</span>
-                <small>Horas</small>
+        </section>
+
+
+        <!-- =========================================
+         CEREMONIA
+         ========================================= -->
+
+        <section id="lugar" class="venue-section reveal">
+
+            <div class="section-content">
+
+                <p class="section-label">
+                    La ceremonia
+                </p>
+
+                <h2>
+                    Iglesia
+                </h2>
+
+                <div class="divider">
+                    ✦
+                </div>
+
+                <div class="venue-card">
+
+                    <div class="venue-icon">
+                        <span>⌖</span>
+                    </div>
+
+                    <h3 id="iglesia">
+                        Santiago Apóstol
+                    </h3>
+
+                    <p class="venue-address">
+                        Ceremonia religiosa
+                    </p>
+
+                    <p class="venue-description">
+                        Acompáñanos a compartir con nosotros
+                        este momento tan especial.
+                    </p>
+
+                    <p class="venue-address">
+                        <strong id="hora-ceremonia">
+                            2:00 pm
+                        </strong>
+                    </p>
+
+                </div>
+
             </div>
 
-            <div class="countdown-card">
-                <span id="minutos">0</span>
-                <small>Min</small>
+        </section>
+
+
+        <!-- =========================================
+         NUESTRA HISTORIA
+         ========================================= -->
+
+        <section id="historia" class="story-section reveal">
+
+            <div class="section-content">
+
+                <p class="section-label">
+                    Nuestra historia
+                </p>
+
+                <h2>
+                    Un camino que elegimos juntos
+                </h2>
+
+                <div class="divider">
+                    ✦
+                </div>
+
+
+                <!-- HISTORIA 1 -->
+
+                <article class="story-item">
+
+                    <div class="story-image">
+
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop"
+                             alt="Pareja celebrando">
+
+                    </div>
+
+                    <div class="story-text">
+
+                        <span class="story-year">
+                            2019
+                        </span>
+
+                        <h3>
+                            El comienzo
+                        </h3>
+
+                        <p>
+                            Nos conocimos casi por casualidad y,
+                            sin saberlo, ese encuentro cambiaría
+                            nuestras vidas para siempre.
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- HISTORIA 2 -->
+
+                <article class="story-item story-reverse">
+
+                    <div class="story-image">
+
+                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1000&auto=format&fit=crop"
+                             alt="Pareja caminando">
+
+                    </div>
+
+                    <div class="story-text">
+
+                        <span class="story-year">
+                            2023
+                        </span>
+
+                        <h3>
+                            Un hogar
+                        </h3>
+
+                        <p>
+                            Con el paso de los años llegaron
+                            aventuras, aprendizajes, viajes y
+                            muchísimos momentos que hoy forman
+                            parte de nuestra historia.
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- HISTORIA 3 -->
+
+                <article class="story-item">
+
+                    <div class="story-image">
+
+                        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1000&auto=format&fit=crop"
+                             alt="Propuesta de matrimonio">
+
+                    </div>
+
+                    <div class="story-text">
+
+                        <span class="story-year">
+                            2026
+                        </span>
+
+                        <h3>
+                            El siguiente capítulo
+                        </h3>
+
+                        <p>
+                            Hoy queremos celebrar el inicio de
+                            una nueva etapa y compartirla con
+                            las personas que han sido parte de
+                            nuestro camino.
+                        </p>
+
+                    </div>
+
+                </article>
+
             </div>
 
-            <div class="countdown-card">
-                <span id="segundos">0</span>
-                <small>Seg</small>
+        </section>
+
+
+        <!-- =========================================
+         DETALLES DEL EVENTO
+         ========================================= -->
+
+        <section id="evento" class="event-section reveal">
+
+            <div class="section-content">
+
+                <p class="section-label">
+                    El gran día
+                </p>
+
+                <h2>
+                    Detalles del evento
+                </h2>
+
+                <div class="divider">
+                    ✦
+                </div>
+
+                <div class="event-grid">
+
+
+                    <!-- CEREMONIA -->
+
+                    <article class="event-card reveal-child">
+
+                        <div class="event-icon">
+                            ♡
+                        </div>
+
+                        <span class="event-label">
+                            Ceremonia
+                        </span>
+
+                        <h3 id="hora-ceremonia-evento">
+                            2:00 pm
+                        </h3>
+
+                        <p id="iglesia-evento">
+                            Santiago Apóstol
+                        </p>
+
+                        <small>
+                            Ceremonia religiosa
+                        </small>
+
+                    </article>
+
+
+                    <!-- RECEPCIÓN -->
+
+                    <article class="event-card reveal-child">
+
+                        <div class="event-icon">
+                            ✦
+                        </div>
+
+                        <span class="event-label">
+                            Recepción
+                        </span>
+
+                        <h3 id="recepcion-horario">
+                            4:00 pm a 9:00 pm
+                        </h3>
+
+                        <p id="recepcion-lugar">
+                            Salón República
+                        </p>
+
+                        <small>
+                            Recepción y celebración
+                        </small>
+
+                    </article>
+
+
+                    <!-- VESTIMENTA -->
+
+                    <article class="event-card reveal-child">
+
+                        <div class="event-icon">
+                            ◇
+                        </div>
+
+                        <span class="event-label">
+                            Vestimenta
+                        </span>
+
+                        <h3>
+                            Formal
+                        </h3>
+
+                        <p>
+                            Elegante y cómoda
+                        </p>
+
+                        <small>
+                            ¡Celebremos juntos!
+                        </small>
+
+                    </article>
+
+
+                </div>
+
             </div>
 
-        </div>
+        </section>
 
-        <p class="countdown-status">
-            Cuenta regresiva para
-        </p>
 
-        <p class="countdown-date">
-            Sábado, 21 de noviembre de 2026
-        </p>
+        <!-- =========================================
+         PADRINOS
+         ========================================= -->
 
-    </div>
+        <section id="padrinos" class="gifts-section reveal">
 
-</section>
-        <!-- LUGAR -->
-         <section id="lugar" class="venue-section reveal">
+            <div class="section-content">
 
-             <div class="section-content">
+                <p class="section-label">
+                    Personas especiales
+                </p>
 
-                 <p class="section-label">
-                     La sede
-                 </p>
+                <h2>
+                    Nuestros padrinos
+                </h2>
 
-                 <h2>
-                     El lugar
-                 </h2>
+                <div class="divider">
+                    ✦
+                </div>
 
-                 <div class="divider">
-                     ✦
-                 </div>
+                <div class="gift-options">
 
-                 <div class="venue-card">
+                    <!-- PADRINOS DE VELACIÓN -->
 
-                     <div class="venue-icon">
-                         <span>⌖</span>
-                     </div>
+                    <div class="gift-card">
 
-                     <h3 id="venue-name">
-                         Hacienda San Miguel
-                     </h3>
+                        <div class="gift-icon">
+                            ♡
+                        </div>
 
-                     <p class="venue-address">
-                         Camino al Lago 125<br>
-                         Valle de Bravo, Estado de México
-                     </p>
+                        <h3>
+                            Padrinos de velación
+                        </h3>
 
-                     <p class="venue-description">
-                         Un lugar rodeado de naturaleza, perfecto para
-                         celebrar este momento junto a las personas
-                         que más queremos.
-                     </p>
+                        <p>
+                            Regina Ramos Ortega<br>
+                            Jesé Francisco Rodríguez García
+                        </p>
 
-                     <a href="https://www.google.com/maps/search/?api=1&query=Hacienda+San+Miguel+Valle+de+Bravo"
-                        target="_blank"
-                        class="map-button">
-                         Ver ubicación
-                     </a>
+                    </div>
 
-                 </div>
 
-             </div>
+                    <!-- PADRINOS DE LAZO -->
 
-         </section>
-        <!-- NUESTRA HISTORIA -->
-         <section id="historia" class="story-section reveal">
+                    <div class="gift-card">
 
-             <div class="section-content">
+                        <div class="gift-icon">
+                            ✦
+                        </div>
 
-                 <p class="section-label">
-                     Nuestra historia
-                 </p>
+                        <h3>
+                            Padrinos de lazo
+                        </h3>
 
-                 <h2>
-                     Un camino que elegimos juntos
-                 </h2>
+                        <p>
+                            Laura Gpe. López Reyes<br>
+                            Facundo Rodolfo Calderón Mercado
+                        </p>
 
-                 <div class="divider">
-                     ✦
-                 </div>
+                    </div>
 
 
-                 <!-- HISTORIA 1 -->
-                 <article class="story-item">
+                    <!-- PADRINOS DE ARRAS -->
 
-                     <div class="story-image">
-                         <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop"
-                              alt="Pareja celebrando">
-                     </div>
+                    <div class="gift-card">
 
-                     <div class="story-text">
+                        <div class="gift-icon">
+                            ◇
+                        </div>
 
-                         <span class="story-year">
-                             2019
-                         </span>
+                        <h3>
+                            Padrinos de arras
+                        </h3>
 
-                         <h3>
-                             El comienzo
-                         </h3>
+                        <p id="padrinos-arras">
+                            Por confirmar
+                        </p>
 
-                         <p>
-                             Nos conocimos casi por casualidad y,
-                             sin saberlo, ese encuentro cambiaría
-                             nuestras vidas para siempre.
-                         </p>
+                    </div>
 
-                     </div>
+                </div>
 
-                 </article>
+            </div>
 
+        </section>
 
-                 <!-- HISTORIA 2 -->
-                 <article class="story-item story-reverse">
+        <!-- =========================================
+    UBICACIONES
+    ========================================= -->
 
-                     <div class="story-image">
-                         <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1000&auto=format&fit=crop"
-                              alt="Pareja caminando">
-                     </div>
+        <section id="ubicacion" class="locations-section reveal">
 
-                     <div class="story-text">
+            <div class="section-content">
 
-                         <span class="story-year">
-                             2023
-                         </span>
+                <p class="section-label">
+                    Cómo llegar
+                </p>
 
-                         <h3>
-                             Un hogar
-                         </h3>
+                <h2>
+                    Te esperamos
+                </h2>
 
-                         <p>
-                             Con el paso de los años llegaron
-                             aventuras, aprendizajes, viajes y
-                             muchísimos momentos que hoy forman
-                             parte de nuestra historia.
-                         </p>
+                <div class="divider">
+                    ✦
+                </div>
 
-                     </div>
 
-                 </article>
+                <div class="locations-grid">
 
 
-                 <!-- HISTORIA 3 -->
-                 <article class="story-item">
+                    <!-- =================================
+                     IGLESIA
+                     ================================= -->
 
-                     <div class="story-image">
-                         <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1000&auto=format&fit=crop"
-                              alt="Propuesta de matrimonio">
-                     </div>
+                    <article class="location-card">
 
-                     <div class="story-text">
+                        <div class="location-card-header">
 
-                         <span class="story-year">
-                             2026
-                         </span>
+                            <span class="location-number">
+                                01
+                            </span>
 
-                         <h3>
-                             El siguiente capítulo
-                         </h3>
+                            <span class="location-type">
+                                Ceremonia
+                            </span>
 
-                         <p>
-                             Hoy queremos celebrar el inicio de
-                             una nueva etapa y compartirla con
-                             las personas que han sido parte de
-                             nuestro camino.
-                         </p>
+                        </div>
 
-                     </div>
 
-                 </article>
+                        <div class="location-map">
 
-             </div>
+                            <iframe src="https://www.google.com/maps?q=21.3510282,-98.2267166&output=embed"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    title="Ubicación de la Parroquia Santiago Apóstol">
+                            </iframe>
 
-         </section>
-        <!-- DETALLES DEL EVENTO -->
-         <section id="evento" class="event-section">
+                        </div>
 
-             <div class="section-content">
 
-                 <p class="section-label">
-                     El gran día
-                 </p>
+                        <div class="location-info">
 
-                 <h2>
-                     Detalles del evento
-                 </h2>
+                            <p class="location-label">
+                                Iglesia
+                            </p>
 
-                 <div class="divider">
-                     ✦
-                 </div>
+                            <h3>
+                                Santiago Apóstol
+                            </h3>
 
+                            <p class="location-time">
+                                2:00 pm
+                            </p>
 
-                 <div class="event-grid">
+                            <p class="location-description">
+                                Ceremonia religiosa
+                            </p>
 
 
-                     <!-- CEREMONIA -->
-                     <article class="event-card reveal-child">
+                            <a href="https://maps.app.goo.gl/iRwN3Z6AGfscUSHL7"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="map-button">
 
-                         <div class="event-icon">
-                             ♡
-                         </div>
+                                Ver ubicación
 
-                         <span class="event-label">
-                             Ceremonia
-                         </span>
+                                <span>↗</span>
 
-                         <h3>
-                             17:30 h
-                         </h3>
+                            </a>
 
-                         <p>
-                             Hacienda San Miguel
-                         </p>
+                        </div>
 
-                         <small>
-                             Te esperamos 30 minutos antes
-                         </small>
+                    </article>
 
-                     </article>
 
 
-                     <!-- RECEPCIÓN -->
-                     <article class="event-card reveal-child">
+                    <!-- =================================
+                     SALÓN
+                     ================================= -->
 
-                         <div class="event-icon">
-                             ✦
-                         </div>
+                    <article class="location-card">
 
-                         <span class="event-label">
-                             Recepción
-                         </span>
+                        <div class="location-card-header">
 
-                         <h3>
-                             19:00 h
-                         </h3>
+                            <span class="location-number">
+                                02
+                            </span>
 
-                         <p>
-                             Cena y celebración
-                         </p>
+                            <span class="location-type">
+                                Recepción
+                            </span>
 
-                         <small>
-                             Música, cena y brindis
-                         </small>
+                        </div>
 
-                     </article>
 
+                        <div class="location-map">
 
-                     <!-- VESTIMENTA -->
-                     <article class="event-card reveal-child">
+                            <iframe src="https://www.google.com/maps?q=21.3632931,-98.2333078&output=embed"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    title="Ubicación del Salón República">
+                            </iframe>
 
-                         <div class="event-icon">
-                             ◇
-                         </div>
+                        </div>
 
-                         <span class="event-label">
-                             Vestimenta
-                         </span>
 
-                         <h3>
-                             Formal
-                         </h3>
+                        <div class="location-info">
 
-                         <p>
-                             Elegante y cómoda
-                         </p>
+                            <p class="location-label">
+                                Recepción
+                            </p>
 
-                         <small>
-                             ¡Celebremos juntos!
-                         </small>
+                            <h3>
+                                Salón República
+                            </h3>
 
-                     </article>
+                            <p class="location-time">
+                                4:00 pm — 9:00 pm
+                            </p>
 
+                            <p class="location-description">
+                                Recepción y celebración
+                            </p>
 
-                 </div>
 
-             </div>
+                            <a href="https://maps.app.goo.gl/RLG69pHYmwSfiVsK8"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="map-button">
 
-         </section>
-        <!-- MAPA -->
-         <section id="ubicacion" class="map-section">
+                                Ver ubicación
 
-             <div class="section-content">
+                                <span>↗</span>
 
-                 <p class="section-label">
-                     Cómo llegar
-                 </p>
+                            </a>
 
-                 <h2>
-                     Te esperamos aquí
-                 </h2>
+                        </div>
 
-                 <div class="divider">
-                     ✦
-                 </div>
+                    </article>
 
 
-                 <div class="map-wrapper">
+                </div>
 
-                     <iframe src="https://www.google.com/maps?q=Hacienda+San+Miguel+Valle+de+Bravo&output=embed"
-                             loading="lazy"
-                             referrerpolicy="no-referrer-when-downgrade"
-                             title="Ubicación de Hacienda San Miguel">
-                     </iframe>
+            </div>
 
-                 </div>
+        </section>
 
+        <!-- =========================================
+         GALERÍA
+         ========================================= -->
 
-                 <div class="map-info">
+        <section id="galeria" class="gallery-section reveal">
 
-                     <h3>
-                         Hacienda San Miguel
-                     </h3>
+            <div class="section-content">
 
-                     <p>
-                         Camino al Lago 125<br>
-                         Valle de Bravo, Estado de México
-                     </p>
+                <p class="section-label">
+                    Algunos recuerdos
+                </p>
 
-                     <a href="https://www.google.com/maps/search/?api=1&query=Hacienda+San+Miguel+Valle+de+Bravo"
-                        target="_blank"
-                        class="map-button">
+                <h2>
+                    Momentos que nos trajeron hasta aquí
+                </h2>
 
-                         Abrir en Google Maps
+                <div class="divider">
+                    ✦
+                </div>
 
-                     </a>
+                <div class="gallery">
 
-                 </div>
+                    <div class="gallery-item gallery-large">
 
-             </div>
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop"
+                             alt="Momento de pareja">
 
-         </section>
-        <!-- GALERÍA -->
-         <section id="galeria" class="gallery-section">
+                    </div>
 
-             <div class="section-content">
 
-                 <p class="section-label">
-                     Algunos recuerdos
-                 </p>
+                    <div class="gallery-item">
 
-                 <h2>
-                     Momentos que nos trajeron hasta aquí
-                 </h2>
+                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=900&auto=format&fit=crop"
+                             alt="Pareja caminando">
 
-                 <div class="divider">
-                     ✦
-                 </div>
+                    </div>
 
 
-                 <div class="gallery">
+                    <div class="gallery-item">
 
-                     <div class="gallery-item gallery-large">
-                         <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop"
-                              alt="Momento de pareja">
-                     </div>
+                        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=900&auto=format&fit=crop"
+                             alt="Celebración">
 
+                    </div>
 
-                     <div class="gallery-item">
-                         <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=900&auto=format&fit=crop"
-                              alt="Pareja caminando">
-                     </div>
 
+                    <div class="gallery-item">
 
-                     <div class="gallery-item">
-                         <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=900&auto=format&fit=crop"
-                              alt="Celebración">
-                     </div>
+                        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=900&auto=format&fit=crop"
+                             alt="Boda">
 
+                    </div>
 
-                     <div class="gallery-item">
-                         <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=900&auto=format&fit=crop"
-                              alt="Boda">
-                     </div>
 
+                    <div class="gallery-item">
 
-                     <div class="gallery-item">
-                         <img src="https://images.unsplash.com/photo-1507504031003-b417219a0fde?q=80&w=900&auto=format&fit=crop"
-                              alt="Pareja">
-                     </div>
+                        <img src="https://images.unsplash.com/photo-1507504031003-b417219a0fde?q=80&w=900&auto=format&fit=crop"
+                             alt="Pareja">
 
-                 </div>
+                    </div>
 
-             </div>
+                </div>
 
-         </section>
-        <!-- CONFIRMACIÓN -->
-         <section id="confirmacion" class="rsvp-section">
+            </div>
 
-             <div class="section-content">
+        </section>
 
-                 <p class="section-label">
-                     Tu presencia es nuestro regalo
-                 </p>
 
-                 <h2>
-                     ¿Nos acompañas?
-                 </h2>
+        <!-- =========================================
+         CONFIRMACIÓN
+         ========================================= -->
 
-                 <div class="divider">
-                     ✦
-                 </div>
+        <section id="confirmacion" class="rsvp-section reveal">
 
-                 <p class="rsvp-message">
-                     Queremos compartir este día contigo.
-                     Por favor confirma tu asistencia antes
-                     del 1 de noviembre.
-                 </p>
+            <div class="section-content">
 
-                 <a href="#"
-                    class="rsvp-button">
-                     Confirmar asistencia
-                 </a>
+                <p class="section-label">
+                    Tu presencia es nuestro regalo
+                </p>
 
-             </div>
+                <h2>
+                    ¿Nos acompañas?
+                </h2>
 
-         </section>
-        <!-- REGALOS -->
-         <section id="regalos" class="gifts-section">
+                <div class="divider">
+                    ✦
+                </div>
 
-             <div class="section-content">
+                <p class="rsvp-message">
+                    Queremos compartir este día contigo.
+                    Por favor confirma tu asistencia.
+                </p>
 
-                 <p class="section-label">
-                     Si deseas tener un detalle con nosotros
-                 </p>
+                <a href="https://wa.me/527891004515?text=Hola%2C%20quiero%20confirmar%20mi%20asistencia%20a%20la%20boda%20de%20Eric%20y%20Yolanda.%20%C2%A1Muchas%20gracias%21"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="rsvp-button">
 
-                 <h2>
-                     Mesa de regalos
-                 </h2>
+                    Confirmar asistencia
 
-                 <div class="divider">
-                     ✦
-                 </div>
+                </a>
 
-                 <p class="gifts-message">
-                     Lo más importante para nosotros es
-                     compartir este día contigo. Si además
-                     deseas hacernos un regalo, aquí encontrarás
-                     algunas opciones.
-                 </p>
+            </div>
 
+        </section>
 
-                 <div class="gift-options">
 
-                     <div class="gift-card">
+        <!-- =========================================
+         CIERRE
+         ========================================= -->
 
-                         <div class="gift-icon">
-                             ♡
-                         </div>
-
-                         <h3>
-                             Liverpool
-                         </h3>
-
-                         <p>
-                             Mesa de regalos
-                         </p>
-
-                         <a href="#" class="text-button">
-                             Ver mesa
-                         </a>
-
-                     </div>
-
-
-                     <div class="gift-card">
-
-                         <div class="gift-icon">
-                             ✦
-                         </div>
-
-                         <h3>
-                             Luna de miel
-                         </h3>
-
-                         <p>
-                             Una aportación para nuestro viaje
-                         </p>
-
-                         <a href="#" class="text-button">
-                             Ver detalles
-                         </a>
-
-                     </div>
-
-                 </div>
-
-             </div>
-
-         </section>
-        <!-- CIERRE -->
         <section class="closing-section">
 
             <div class="closing-content">
@@ -618,12 +857,12 @@
                     Gracias por ser parte de nuestra historia
                 </p>
 
-                <h2>
-                    Alejandro & Valeria
+                <h2 id="closing-novios">
+                    Eric Hernández Vargas & Yolanda Álvarez Bonilla
                 </h2>
 
-                <p class="closing-date">
-                    21 · 11 · 2026
+                <p class="closing-date" id="closing-fecha">
+                    15 · 12 · 2026
                 </p>
 
                 <div class="closing-symbol">
@@ -633,9 +872,12 @@
             </div>
 
         </section>
+
     </main>
 
+
     <script src="js/app.js"></script>
+    ```
 
 </body>
 
