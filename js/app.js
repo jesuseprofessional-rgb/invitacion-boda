@@ -9,7 +9,7 @@ const boda = {
         novia: "Yolanda Álvarez Bonilla"
     },
 
-    fecha: "2026-12-15T14:00:00",
+    fecha: "2026-12-05T14:00:00",
 
     iglesia: {
         nombre: "Santiago Apóstol",
@@ -112,7 +112,7 @@ musicToggle.addEventListener("click", () => {
 // =========================================
 
 const nombreNovios =
-    `${ boda.novios.novio } & ${ boda.novios.novia }`;
+    `${ boda.novios.novia } & ${ boda.novios.novio }`;
 
 
 // =========================================
