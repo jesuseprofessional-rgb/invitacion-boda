@@ -364,3 +364,176 @@ setInterval(
 console.log(
     "Invitación de boda cargada correctamente."
 );
+// =========================================
+// CONFIRMACION DE ASISTENCIA
+// =========================================
+
+async function inicializarConfirmacion() {
+
+    const mensaje = document.getElementById("rsvp-message");
+    const loading = document.getElementById("rsvp-loading");
+    const error = document.getElementById("rsvp-error");
+    const contenedor = document.getElementById("rsvp-invitados");
+    const estado = document.getElementById("rsvp-status");
+
+    // Si la sección no existe, no hacemos nada.
+    if (!mensaje || !loading || !error || !contenedor || !estado) {
+        return;
+    }
+
+    const parametros = new URLSearchParams(window.location.search);
+    const token = parametros.get("token");
+
+    // Sin token, mostramos la invitación normalmente.
+    if (!token) {
+        mensaje.textContent =
+            "Si recibiste una invitación personalizada, abre el enlace que te compartieron para confirmar tu asistencia.";
+        return;
+    }
+
+    loading.hidden = false;
+    error.hidden = true;
+    contenedor.hidden = true;
+    estado.textContent = "";
+
+    try {
+        const respuesta = await fetch(
+            `/api/invitacion/${encodeURIComponent(token)}`
+        );
+
+        if (respuesta.status === 404) {
+            throw new Error(
+                "Este enlace de invitación no es válido o ya fue revocado. Por favor, contacta a los novios."
+            );
+        }
+
+        if (!respuesta.ok) {
+            throw new Error(
+                "No fue posible consultar la invitación. Inténtalo nuevamente más tarde."
+            );
+        }
+
+        const datos = await respuesta.json();
+
+        if (!Array.isArray(datos.invitados) || datos.invitados.length === 0) {
+            throw new Error(
+                "Esta invitación no tiene invitados activos asociados."
+            );
+        }
+
+        mensaje.textContent =
+            "Selecciona la respuesta de cada invitado. Tus respuestas se guardarán al confirmar.";
+
+        contenedor.replaceChildren();
+
+        datos.invitados.forEach((invitado) => {
+            const tarjeta = document.createElement("div");
+            tarjeta.className = "rsvp-guest";
+
+            const nombre = document.createElement("h3");
+            nombre.textContent = invitado.nombre;
+
+            const respuestaActual = document.createElement("p");
+            respuestaActual.className = "rsvp-guest-status";
+
+            const asistenciaActual = invitado.asistencia;
+
+            if (asistenciaActual === "CONFIRMADO") {
+                respuestaActual.textContent = "Asistencia confirmada";
+            } else if (asistenciaActual === "DECLINADO") {
+                respuestaActual.textContent = "Asistencia declinada";
+            } else {
+                respuestaActual.textContent = "Pendiente de respuesta";
+            }
+
+            const acciones = document.createElement("div");
+            acciones.className = "rsvp-guest-actions";
+
+            const botonConfirmar = document.createElement("button");
+            botonConfirmar.type = "button";
+            botonConfirmar.className = "rsvp-button";
+            botonConfirmar.textContent = "Confirmar asistencia";
+
+            const botonDeclinar = document.createElement("button");
+            botonDeclinar.type = "button";
+            botonDeclinar.className = "rsvp-button rsvp-button-secondary";
+            botonDeclinar.textContent = "No podré asistir";
+
+            async function guardarAsistencia(asistencia, boton) {
+                botonConfirmar.disabled = true;
+                botonDeclinar.disabled = true;
+                estado.textContent = "Guardando respuesta...";
+
+                try {
+                    const respuesta = await fetch(
+                        `/api/invitacion/${encodeURIComponent(token)}/asistencia`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                invitado_id: invitado.id,
+                                asistencia: asistencia
+                            })
+                        }
+                    );
+
+                    if (respuesta.status === 404) {
+                        throw new Error(
+                            "La invitación ya no está disponible. Contacta a los novios."
+                        );
+                    }
+
+                    if (!respuesta.ok) {
+                        throw new Error(
+                            "No se pudo guardar tu respuesta. Inténtalo nuevamente."
+                        );
+                    }
+
+                    invitado.asistencia = asistencia;
+
+                    respuestaActual.textContent =
+                        asistencia === "CONFIRMADO"
+                            ? "Asistencia confirmada"
+                            : "Asistencia declinada";
+
+                    estado.textContent =
+                        "Respuesta guardada correctamente para " +
+                        invitado.nombre +
+                        ".";
+
+                } catch (err) {
+                    estado.textContent = "";
+                    error.textContent = err.message;
+                    error.hidden = false;
+                } finally {
+                    botonConfirmar.disabled = false;
+                    botonDeclinar.disabled = false;
+                }
+            }
+
+            botonConfirmar.addEventListener("click", () => {
+                guardarAsistencia("CONFIRMADO", botonConfirmar);
+            });
+
+            botonDeclinar.addEventListener("click", () => {
+                guardarAsistencia("DECLINADO", botonDeclinar);
+            });
+
+            acciones.append(botonConfirmar, botonDeclinar);
+            tarjeta.append(nombre, respuestaActual, acciones);
+            contenedor.appendChild(tarjeta);
+        });
+
+        contenedor.hidden = false;
+
+    } catch (err) {
+        error.textContent = err.message;
+        error.hidden = false;
+    } finally {
+        loading.hidden = true;
+    }
+}
+
+inicializarConfirmacion();

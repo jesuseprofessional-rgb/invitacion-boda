@@ -1,3 +1,11 @@
 .vs/
 bin/
 obj/
+
+# Configuracion sensible de la API
+api/.env
+
+# Entorno y archivos generados de Python
+api/.venv/
+api/__pycache__/
+
