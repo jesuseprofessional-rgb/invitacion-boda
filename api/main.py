@@ -345,7 +345,68 @@ def comprobar_base_datos():
             detail="No fue posible conectar con la base de datos",
         )
 
+@app.get("/responsables")
+def consultar_responsables(
+    _: bool = Depends(verificar_admin),
+):
+    conexion = None
 
+    try:
+        conexion = obtener_conexion()
+
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    r.id,
+                    r.nombre,
+                    r.telefono,
+                    r.activo,
+                    r.creado_en,
+                    COUNT(i.id) AS total_invitados,
+                    SUM(
+                        CASE
+                            WHEN i.asistencia = 'CONFIRMADO' THEN 1
+                            ELSE 0
+                        END
+                    ) AS total_confirmados,
+                    SUM(
+                        CASE
+                            WHEN i.asistencia = 'DECLINADO' THEN 1
+                            ELSE 0
+                        END
+                    ) AS total_declinados
+                FROM responsables AS r
+                LEFT JOIN invitados AS i
+                    ON i.responsable_id = r.id
+                    AND i.activo = 1
+                WHERE r.activo = 1
+                GROUP BY
+                    r.id,
+                    r.nombre,
+                    r.telefono,
+                    r.activo,
+                    r.creado_en
+                ORDER BY r.nombre ASC
+                """
+            )
+
+            responsables = cursor.fetchall()
+
+        return {
+            "total_responsables": len(responsables),
+            "responsables": responsables,
+        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible consultar los responsables",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()
 @app.post("/responsables", status_code=201)
 def crear_responsable(
     responsable: ResponsableCrear,

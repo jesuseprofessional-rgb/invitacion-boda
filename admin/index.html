@@ -13,7 +13,6 @@
         <!-- Acceso administrativo -->
         <section id="login-screen" class="login-card">
             <div class="brand-mark">E <span>&</span> Y</div>
-
             <p class="eyebrow">BODA · 05 DICIEMBRE 2026</p>
             <h1>Administración</h1>
             <p class="description">
@@ -22,7 +21,6 @@
 
             <form id="login-form">
                 <label for="admin-password">Contraseña</label>
-
                 <input type="password"
                        id="admin-password"
                        name="password"
@@ -55,74 +53,204 @@
                 </button>
             </header>
 
-            <div class="welcome-card">
-                <div>
-                    <p class="eyebrow">ACCESO AUTORIZADO</p>
-                    <h2>Bienvenido</h2>
-                    <p>
-                        La sesión administrativa está activa.
-                    </p>
+            <!-- Inicio -->
+            <section id="home-view">
+                <div class="welcome-card">
+                    <div>
+                        <p class="eyebrow">ACCESO AUTORIZADO</p>
+                        <h2>Bienvenido</h2>
+                        <p>La sesión administrativa está activa.</p>
+                    </div>
+                    <div class="status-indicator">
+                        <span></span> Sesión activa
+                    </div>
                 </div>
-                <div class="status-indicator">
-                    <span></span> Sesión activa
+
+                <div class="section-heading">
+                    <h2>Administración de la boda</h2>
+                    <p>Selecciona el módulo que deseas administrar.</p>
                 </div>
-            </div>
 
-            <div class="section-heading">
-                <h2>Administración de la boda</h2>
-                <p>Desde aquí organizaremos toda la información.</p>
-            </div>
+                <div class="modules-grid">
+                    <button class="module-card module-button"
+                            type="button"
+                            data-module="responsables">
+                        <span class="module-number">01</span>
+                        <h3>Responsables</h3>
+                        <p>Registrar y consultar familias o grupos de invitados.</p>
+                        <span class="module-status">Abrir módulo</span>
+                    </button>
 
-            <div class="modules-grid">
-                <article class="module-card">
-                    <span class="module-number">01</span>
-                    <h3>Responsables</h3>
-                    <p>
-                        Registrar y consultar familias o grupos de invitados.
-                    </p>
-                    <span class="module-status">Próximamente</span>
-                </article>
+                    <article class="module-card">
+                        <span class="module-number">02</span>
+                        <h3>Invitados</h3>
+                        <p>Registrar personas y asignarlas a un responsable.</p>
+                        <span class="module-status">En desarrollo</span>
+                    </article>
 
-                <article class="module-card">
-                    <span class="module-number">02</span>
-                    <h3>Invitados</h3>
-                    <p>
-                        Registrar personas y asignarlas a un responsable.
-                    </p>
-                    <span class="module-status">Próximamente</span>
-                </article>
+                    <article class="module-card">
+                        <span class="module-number">03</span>
+                        <h3>Invitaciones</h3>
+                        <p>Seleccionar invitados y generar enlaces.</p>
+                        <span class="module-status">En desarrollo</span>
+                    </article>
 
-                <article class="module-card">
-                    <span class="module-number">03</span>
-                    <h3>Invitaciones</h3>
-                    <p>
-                        Seleccionar invitados y generar enlaces individuales.
-                    </p>
-                    <span class="module-status">Próximamente</span>
-                </article>
+                    <article class="module-card">
+                        <span class="module-number">04</span>
+                        <h3>Confirmaciones</h3>
+                        <p>Consultar quién confirmó, declinó o está pendiente.</p>
+                        <span class="module-status">En desarrollo</span>
+                    </article>
 
-                <article class="module-card">
-                    <span class="module-number">04</span>
-                    <h3>Confirmaciones</h3>
-                    <p>
-                        Consultar quién confirmó, declinó o está pendiente.
-                    </p>
-                    <span class="module-status">Próximamente</span>
-                </article>
+                    <article class="module-card">
+                        <span class="module-number">05</span>
+                        <h3>Enlaces</h3>
+                        <p>Consultar invitaciones generadas y revocar enlaces.</p>
+                        <span class="module-status">En desarrollo</span>
+                    </article>
+                </div>
+            </section>
 
-                <article class="module-card">
-                    <span class="module-number">05</span>
-                    <h3>Enlaces</h3>
-                    <p>
-                        Consultar invitaciones generadas y revocar enlaces.
-                    </p>
-                    <span class="module-status">Próximamente</span>
-                </article>
-            </div>
+            <!-- Módulo de responsables -->
+            <section id="responsables-view" hidden>
+                <div class="module-toolbar">
+                    <button type="button"
+                            class="button-secondary"
+                            id="back-home-button">
+                        ← Volver al inicio
+                    </button>
+                    <div>
+                        <p class="eyebrow">MÓDULO 01</p>
+                        <h2>Responsables</h2>
+                        <p class="description">
+                            Administración de familias y grupos de invitados.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <span>Responsables activos</span>
+                        <strong id="total-responsables">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>Invitados registrados</span>
+                        <strong id="total-invitados">0</strong>
+                    </article>
+                </div>
+
+                <div class="content-card">
+                    <div class="content-heading">
+                        <div>
+                            <h3>Registrar responsable</h3>
+                            <p>Agrega una familia o persona responsable de una invitación.</p>
+                        </div>
+                    </div>
+
+                    <form id="responsable-form" class="responsable-form">
+                        <div class="form-field">
+                            <label for="responsable-nombre">Nombre *</label>
+                            <input type="text"
+                                   id="responsable-nombre"
+                                   name="nombre"
+                                   placeholder="Ej. Familia García"
+                                   minlength="2"
+                                   maxlength="150"
+                                   required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="responsable-telefono">Teléfono</label>
+                            <input type="tel"
+                                   id="responsable-telefono"
+                                   name="telefono"
+                                   placeholder="Número de contacto"
+                                   maxlength="30">
+                        </div>
+
+                        <button type="submit" id="responsable-submit">
+                            Registrar responsable
+                        </button>
+                    </form>
+
+                    <p id="responsable-message" class="message" role="status"></p>
+                </div>
+
+                <div class="content-card">
+                    <div class="content-heading list-heading">
+                        <div>
+                            <h3>Responsables registrados</h3>
+                            <p>Selecciona un responsable para consultar sus invitados.</p>
+                        </div>
+                        <button type="button"
+                                class="button-secondary"
+                                id="refresh-responsables">
+                            Actualizar
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Invitados</th>
+                                    <th>Confirmados</th>
+                                    <th>Declinados</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="responsables-table-body">
+                                <tr>
+                                    <td colspan="6" class="empty-cell">
+                                        Cargando responsables...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Invitados del responsable seleccionado -->
+                <div id="invitados-responsable-card" class="content-card" hidden>
+                    <div class="content-heading list-heading">
+                        <div>
+                            <p class="eyebrow">DETALLE DEL GRUPO</p>
+                            <h3 id="detalle-responsable-nombre">Invitados</h3>
+                            <p id="detalle-responsable-total"></p>
+                        </div>
+                        <button type="button"
+                                class="button-secondary"
+                                id="close-invitados-button">
+                            Cerrar detalle
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Mesa</th>
+                                    <th>Asistencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invitados-table-body">
+                                <tr>
+                                    <td colspan="4" class="empty-cell">
+                                        Selecciona un responsable.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
             <p id="dashboard-message" class="message" role="status"></p>
         </section>
-
     </main>
 
     <script src="/js/admin.js"></script>
