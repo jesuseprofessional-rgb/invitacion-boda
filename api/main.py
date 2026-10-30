@@ -7,7 +7,8 @@ from pydantic import BaseModel, Field
 from pymysql.cursors import DictCursor
 from fastapi.security import APIKeyHeader
 import hashlib
-
+from datetime import datetime, timedelta, timezone
+from fastapi import Request, Response
 
 
 app = FastAPI(
@@ -39,6 +40,8 @@ class AsistenciaInvitacion(BaseModel):
     asistencia: str = Field(
         pattern="^(CONFIRMADO|DECLINADO)$"
     )
+class AdminLogin(BaseModel):
+    password: str = Field(min_length=1, max_length=256)
 
 def obtener_conexion():
     return pymysql.connect(
@@ -51,27 +54,265 @@ def obtener_conexion():
         cursorclass=DictCursor,
         connect_timeout=5,
     )
+def validar_origen_admin(request: Request):
+    origen_configurado = os.environ.get("ADMIN_ALLOWED_ORIGIN")
+
+    if not origen_configurado:
+        raise HTTPException(
+            status_code=503,
+            detail="Origen administrativo no configurado",
+        )
+
+    origen_recibido = request.headers.get("origin")
+
+    if (
+        not origen_recibido
+        or not secrets.compare_digest(
+            origen_recibido,
+            origen_configurado,
+        )
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Origen de solicitud no permitido",
+        )
+
+
 def verificar_admin(
+    request: Request,
     x_admin_key: str | None = Depends(admin_key_header),
 ):
     clave_configurada = os.environ.get("ADMIN_API_KEY")
 
-    if not clave_configurada:
-        raise HTTPException(
-            status_code=503,
-            detail="Autenticación administrativa no configurada",
-        )
-
+    # Compatibilidad con Swagger y herramientas administrativas.
     if (
-        not x_admin_key
-        or not secrets.compare_digest(x_admin_key, clave_configurada)
+        x_admin_key
+        and clave_configurada
+        and secrets.compare_digest(x_admin_key, clave_configurada)
     ):
+        return True
+
+    # Las solicitudes que modifican datos requieren validación de origen
+    # cuando utilizan la sesión del navegador.
+    if request.method not in ("GET", "HEAD", "OPTIONS"):
+        validar_origen_admin(request)
+
+    token = request.cookies.get("admin_session")
+
+    if not token:
         raise HTTPException(
             status_code=401,
-            detail="Credenciales administrativas inválidas",
+            detail="Sesión administrativa no iniciada",
         )
 
-    return True
+    token_hash = hashlib.sha256(token.encode("utf-8")).digest()
+    conexion = None
+
+    try:
+        conexion = obtener_conexion()
+
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id
+                FROM admin_sessions
+                WHERE token_hash = %s
+                  AND revoked_at IS NULL
+                  AND expires_at > UTC_TIMESTAMP()
+                LIMIT 1
+                """,
+                (token_hash,),
+            )
+
+            sesion = cursor.fetchone()
+
+        if not sesion:
+            raise HTTPException(
+                status_code=401,
+                detail="La sesión ha expirado o fue revocada",
+            )
+
+        return True
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="No fue posible validar la sesión administrativa",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()
+def verificar_password_admin(password: str) -> bool:
+    hash_configurado = os.environ.get("ADMIN_PASSWORD_HASH")
+
+    if not hash_configurado:
+        raise HTTPException(
+            status_code=503,
+            detail="Contraseña administrativa no configurada",
+        )
+
+    try:
+        salt_hex, digest_hex = hash_configurado.split(":", 1)
+
+        salt = bytes.fromhex(salt_hex)
+        digest_esperado = bytes.fromhex(digest_hex)
+
+        digest_recibido = hashlib.scrypt(
+            password.encode("utf-8"),
+            salt=salt,
+            n=2**14,
+            r=8,
+            p=1,
+            dklen=64,
+        )
+
+        return secrets.compare_digest(
+            digest_recibido,
+            digest_esperado,
+        )
+
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=503,
+            detail="Configuración de contraseña administrativa inválida",
+        )
+
+
+@app.post("/admin/login")
+def iniciar_sesion_admin(
+    datos: AdminLogin,
+    request: Request,
+    response: Response,
+):
+    validar_origen_admin(request)
+
+    if not verificar_password_admin(datos.password):
+        raise HTTPException(
+            status_code=401,
+            detail="Contraseña incorrecta",
+        )
+
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode("utf-8")).digest()
+
+    ahora = datetime.now(timezone.utc).replace(tzinfo=None)
+    expiracion = ahora + timedelta(hours=8)
+
+    conexion = None
+
+    try:
+        conexion = obtener_conexion()
+
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO admin_sessions (
+                    token_hash,
+                    expires_at
+                )
+                VALUES (%s, %s)
+                """,
+                (token_hash, expiracion),
+            )
+
+        conexion.commit()
+
+        response.set_cookie(
+            key="admin_session",
+            value=token,
+            max_age=8 * 60 * 60,
+            httponly=True,
+            secure=True,
+            samesite="strict",
+            path="/",
+        )
+
+        return {
+            "authenticated": True,
+            "expires_in": 28800,
+        }
+
+    except Exception:
+        if conexion:
+            conexion.rollback()
+
+        raise HTTPException(
+            status_code=503,
+            detail="No fue posible iniciar la sesión",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()
+
+
+@app.get("/admin/session")
+def consultar_sesion_admin(
+    _: bool = Depends(verificar_admin),
+):
+    return {
+        "authenticated": True,
+    }
+
+
+@app.post("/admin/logout")
+def cerrar_sesion_admin(
+    request: Request,
+    response: Response,
+):
+    validar_origen_admin(request)
+
+    token = request.cookies.get("admin_session")
+
+    if token:
+        token_hash = hashlib.sha256(token.encode("utf-8")).digest()
+        conexion = None
+
+        try:
+            conexion = obtener_conexion()
+
+            with conexion.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE admin_sessions
+                    SET revoked_at = UTC_TIMESTAMP()
+                    WHERE token_hash = %s
+                      AND revoked_at IS NULL
+                    """,
+                    (token_hash,),
+                )
+
+            conexion.commit()
+
+        except Exception:
+            if conexion:
+                conexion.rollback()
+
+            raise HTTPException(
+                status_code=503,
+                detail="No fue posible cerrar la sesión",
+            )
+
+        finally:
+            if conexion:
+                conexion.close()
+
+    response.delete_cookie(
+        key="admin_session",
+        path="/",
+        secure=True,
+        httponly=True,
+        samesite="strict",
+    )
+
+    return {
+        "authenticated": False,
+        "mensaje": "Sesión cerrada correctamente",
+    }
 @app.get("/health")
 def health_check():
     return {

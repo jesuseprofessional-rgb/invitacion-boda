@@ -376,7 +376,6 @@ async function inicializarConfirmacion() {
     const contenedor = document.getElementById("rsvp-invitados");
     const estado = document.getElementById("rsvp-status");
 
-    // Si la sección no existe, no hacemos nada.
     if (!mensaje || !loading || !error || !contenedor || !estado) {
         return;
     }
@@ -384,7 +383,6 @@ async function inicializarConfirmacion() {
     const parametros = new URLSearchParams(window.location.search);
     const token = parametros.get("token");
 
-    // Sin token, mostramos la invitación normalmente.
     if (!token) {
         mensaje.textContent =
             "Si recibiste una invitación personalizada, abre el enlace que te compartieron para confirmar tu asistencia.";
@@ -427,6 +425,7 @@ async function inicializarConfirmacion() {
         contenedor.replaceChildren();
 
         datos.invitados.forEach((invitado) => {
+
             const tarjeta = document.createElement("div");
             tarjeta.className = "rsvp-guest";
 
@@ -435,16 +434,6 @@ async function inicializarConfirmacion() {
 
             const respuestaActual = document.createElement("p");
             respuestaActual.className = "rsvp-guest-status";
-
-            const asistenciaActual = invitado.asistencia;
-
-            if (asistenciaActual === "CONFIRMADO") {
-                respuestaActual.textContent = "Asistencia confirmada";
-            } else if (asistenciaActual === "DECLINADO") {
-                respuestaActual.textContent = "Asistencia declinada";
-            } else {
-                respuestaActual.textContent = "Pendiente de respuesta";
-            }
 
             const acciones = document.createElement("div");
             acciones.className = "rsvp-guest-actions";
@@ -456,12 +445,42 @@ async function inicializarConfirmacion() {
 
             const botonDeclinar = document.createElement("button");
             botonDeclinar.type = "button";
-            botonDeclinar.className = "rsvp-button rsvp-button-secondary";
+            botonDeclinar.className =
+                "rsvp-button rsvp-button-secondary";
             botonDeclinar.textContent = "No podré asistir";
 
-            async function guardarAsistencia(asistencia, boton) {
+            function actualizarEstadoVisual(asistencia) {
+
+                if (asistencia === "CONFIRMADO") {
+                    respuestaActual.textContent = "Asistencia confirmada";
+
+                    botonConfirmar.classList.add("selected");
+                    botonDeclinar.classList.remove("selected");
+
+                } else if (asistencia === "DECLINADO") {
+                    respuestaActual.textContent = "Asistencia declinada";
+
+                    botonDeclinar.classList.add("selected");
+                    botonConfirmar.classList.remove("selected");
+
+                } else {
+                    respuestaActual.textContent = "Pendiente de respuesta";
+
+                    botonConfirmar.classList.remove("selected");
+                    botonDeclinar.classList.remove("selected");
+                }
+            }
+
+            actualizarEstadoVisual(invitado.asistencia);
+
+            async function guardarAsistencia(asistencia) {
+
                 botonConfirmar.disabled = true;
                 botonDeclinar.disabled = true;
+
+                error.hidden = true;
+                error.textContent = "";
+
                 estado.textContent = "Guardando respuesta...";
 
                 try {
@@ -493,20 +512,22 @@ async function inicializarConfirmacion() {
 
                     invitado.asistencia = asistencia;
 
-                    respuestaActual.textContent =
-                        asistencia === "CONFIRMADO"
-                            ? "Asistencia confirmada"
-                            : "Asistencia declinada";
+                    actualizarEstadoVisual(asistencia);
 
                     estado.textContent =
                         "Respuesta guardada correctamente para " +
-                        invitado.nombre +
-                        ".";
+                        invitado.nombre + ".";
 
                 } catch (err) {
-                    estado.textContent = "";
-                    error.textContent = err.message;
+
+                    error.textContent =
+                        err instanceof TypeError
+                            ? "No fue posible conectar con el servidor. Revisa tu conexión e inténtalo nuevamente."
+                            : err.message;
+
                     error.hidden = false;
+                    estado.textContent = "";
+
                 } finally {
                     botonConfirmar.disabled = false;
                     botonDeclinar.disabled = false;
@@ -514,26 +535,39 @@ async function inicializarConfirmacion() {
             }
 
             botonConfirmar.addEventListener("click", () => {
-                guardarAsistencia("CONFIRMADO", botonConfirmar);
+                guardarAsistencia("CONFIRMADO");
             });
 
             botonDeclinar.addEventListener("click", () => {
-                guardarAsistencia("DECLINADO", botonDeclinar);
+                guardarAsistencia("DECLINADO");
             });
 
             acciones.append(botonConfirmar, botonDeclinar);
-            tarjeta.append(nombre, respuestaActual, acciones);
+
+            tarjeta.append(
+                nombre,
+                respuestaActual,
+                acciones
+            );
+
             contenedor.appendChild(tarjeta);
         });
 
         contenedor.hidden = false;
 
     } catch (err) {
-        error.textContent = err.message;
+
+        error.textContent =
+            err instanceof TypeError
+                ? "No fue posible conectar con el servidor. Inténtalo nuevamente más tarde."
+                : err.message;
+
         error.hidden = false;
+
     } finally {
         loading.hidden = true;
     }
 }
 
 inicializarConfirmacion();
+
