@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Administración | Eric & Yolanda</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <main class="admin-container">
+
+        <!-- Acceso administrativo -->
+        <section id="login-screen" class="login-card">
+            <div class="brand-mark">E <span>&</span> Y</div>
+
+            <p class="eyebrow">BODA · 05 DICIEMBRE 2026</p>
+            <h1>Administración</h1>
+            <p class="description">
+                Acceso privado para gestionar las invitaciones.
+            </p>
+
+            <form id="login-form">
+                <label for="admin-password">Contraseña</label>
+
+                <input type="password"
+                       id="admin-password"
+                       name="password"
+                       placeholder="Introduce tu contraseña"
+                       autocomplete="current-password"
+                       required
+                       maxlength="256">
+
+                <button type="submit" id="login-button">
+                    Iniciar sesión
+                </button>
+            </form>
+
+            <p id="login-error" class="message error" role="alert"></p>
+        </section>
+
+        <!-- Panel principal -->
+        <section id="dashboard-screen" class="dashboard" hidden>
+            <header class="dashboard-header">
+                <div>
+                    <p class="eyebrow">ERIC & YOLANDA</p>
+                    <h1>Panel administrativo</h1>
+                    <p class="description">
+                        Gestión de invitados e invitaciones.
+                    </p>
+                </div>
+
+                <button id="logout-button" class="button-secondary">
+                    Cerrar sesión
+                </button>
+            </header>
+
+            <div class="welcome-card">
+                <div>
+                    <p class="eyebrow">ACCESO AUTORIZADO</p>
+                    <h2>Bienvenido</h2>
+                    <p>
+                        La sesión administrativa está activa.
+                    </p>
+                </div>
+                <div class="status-indicator">
+                    <span></span> Sesión activa
+                </div>
+            </div>
+
+            <div class="section-heading">
+                <h2>Administración de la boda</h2>
+                <p>Desde aquí organizaremos toda la información.</p>
+            </div>
+
+            <div class="modules-grid">
+                <article class="module-card">
+                    <span class="module-number">01</span>
+                    <h3>Responsables</h3>
+                    <p>
+                        Registrar y consultar familias o grupos de invitados.
+                    </p>
+                    <span class="module-status">Próximamente</span>
+                </article>
+
+                <article class="module-card">
+                    <span class="module-number">02</span>
+                    <h3>Invitados</h3>
+                    <p>
+                        Registrar personas y asignarlas a un responsable.
+                    </p>
+                    <span class="module-status">Próximamente</span>
+                </article>
+
+                <article class="module-card">
+                    <span class="module-number">03</span>
+                    <h3>Invitaciones</h3>
+                    <p>
+                        Seleccionar invitados y generar enlaces individuales.
+                    </p>
+                    <span class="module-status">Próximamente</span>
+                </article>
+
+                <article class="module-card">
+                    <span class="module-number">04</span>
+                    <h3>Confirmaciones</h3>
+                    <p>
+                        Consultar quién confirmó, declinó o está pendiente.
+                    </p>
+                    <span class="module-status">Próximamente</span>
+                </article>
+
+                <article class="module-card">
+                    <span class="module-number">05</span>
+                    <h3>Enlaces</h3>
+                    <p>
+                        Consultar invitaciones generadas y revocar enlaces.
+                    </p>
+                    <span class="module-status">Próximamente</span>
+                </article>
+            </div>
+
+            <p id="dashboard-message" class="message" role="status"></p>
+        </section>
+
+    </main>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>
