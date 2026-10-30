@@ -186,15 +186,15 @@ logoutButton.addEventListener("click", async () => {
 // Navegación
 // --------------------------------------------------
 
-document.querySelectorAll("[data-module]").forEach((boton) => {
-    boton.addEventListener("click", () => {
-        const modulo = boton.dataset.module;
+const botonResponsables = document.querySelector(
+    '[data-module="responsables"]'
+);
 
-        if (modulo === "responsables") {
-            mostrarResponsables();
-        }
+if (botonResponsables) {
+    botonResponsables.addEventListener("click", () => {
+        mostrarResponsables();
     });
-});
+}
 
 document.getElementById("back-home-button").addEventListener(
     "click",
