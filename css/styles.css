@@ -1154,6 +1154,7 @@ body {
 
 .opening-label {
     margin-bottom: 28px;
+    color:antiquewhite;
     font-size: 0.65rem;
     font-weight: 500;
     letter-spacing: 0.35em;
@@ -1171,6 +1172,7 @@ body {
     margin-bottom: 28px;
     font-family: var(--script-font);
     font-size: 3.2rem;
+    color: antiquewhite;
     font-weight: normal;
     opacity: 0;
     animation: simboloEntrada 1.2s ease 0.5s forwards;
@@ -1184,6 +1186,7 @@ body {
 .opening-verse {
     max-width: 520px;
     margin: 0 auto;
+    color: antiquewhite;
     font-family: var(--heading-font);
     opacity: 0;
     animation: aparecerTexto 1.2s ease 0.7s forwards;
@@ -1247,6 +1250,7 @@ body {
    ========================================= */
 
 .opening-invitation {
+    color: antiquewhite;
     margin-bottom: 16px;
     font-size: 0.65rem;
     letter-spacing: 0.3em;
@@ -1261,6 +1265,7 @@ body {
    ========================================= */
 
 .opening-content h1 {
+    color: antiquewhite;
     margin-bottom: 20px;
     font-family: var(--heading-font);
     font-size: clamp( 3rem, 9vw, 5.5rem );
@@ -1287,6 +1292,7 @@ body {
    ========================================= */
 
 .opening-date {
+    color: antiquewhite;
     margin-bottom: 32px;
     font-family: var(--body-font);
     font-size: 0.68rem;
@@ -1818,3 +1824,60 @@ body {
     .music-toggle.paused {
         opacity: 0.65;
     }
+
+/* =========================================
+   FONDOS DE TARJETAS DE PADRINOS
+========================================= */
+
+.gift-card {
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    isolation: isolate;
+}
+
+    /* Capa oscura para mejorar la lectura */
+
+    .gift-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(35, 28, 25, 0.48);
+        z-index: -1;
+        transition: background 0.3s ease;
+    }
+
+/* Imágenes individuales */
+
+.gift-card-velacion {
+    background-image: url("../assets/fotos/padrinos-velacion.jpg");
+}
+
+.gift-card-lazo {
+    background-image: url("../assets/fotos/padrinos-lazo.jpg");
+}
+
+.gift-card-anillos {
+    background-image: url("../assets/fotos/padrinos-anillos.jpg");
+}
+
+.gift-card-arras {
+    background-image: url("../assets/fotos/padrinos-arras.jpg");
+}
+
+/* Texto sobre las imágenes */
+
+.gift-card h3,
+.gift-card p,
+.gift-card .gift-icon {
+    position: relative;
+    color: #fff;
+}
+
+/* Oscurecer ligeramente al pasar el cursor */
+
+.gift-card:hover::before {
+    background: rgba(35, 28, 25, 0.60);
+}

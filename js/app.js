@@ -32,7 +32,7 @@ const boda = {
             "Facundo Rodolfo Calderón Mercado"
         ],
 
-        arras: "Por confirmar"
+        arras: "Benigno Del Angel Morales"
     }
 
 };
