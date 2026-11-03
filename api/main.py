@@ -34,7 +34,9 @@ class AsistenciaActualizar(BaseModel):
         pattern="^(PENDIENTE|CONFIRMADO|DECLINADO)$"
     )
 class TokenCrear(BaseModel):
-    invitado_ids: list[int] = Field(min_length=1, max_length=20)
+    tipo: str = Field(pattern="^(RESPONSABLE|INDIVIDUAL)$")
+    responsable_id: int | None = Field(default=None, gt=0)
+    invitado_ids: list[int] | None = Field(default=None, min_length=1, max_length=100)
 class AsistenciaInvitacion(BaseModel):
     invitado_id: int = Field(gt=0)
     asistencia: str = Field(
@@ -790,68 +792,166 @@ def crear_token(
     datos: TokenCrear,
     _: bool = Depends(verificar_admin),
 ):
-    # Evitar IDs repetidos en la misma invitación.
-    if len(datos.invitado_ids) != len(set(datos.invitado_ids)):
-        raise HTTPException(
-            status_code=422,
-            detail="La lista contiene IDs de invitados repetidos",
-        )
+    # Validar la combinación de datos recibida.
+    if datos.tipo == "RESPONSABLE":
+        if not datos.responsable_id:
+            raise HTTPException(
+                status_code=422,
+                detail="Se requiere responsable_id para un enlace grupal",
+            )
+
+        if datos.invitado_ids:
+            raise HTTPException(
+                status_code=422,
+                detail="Un enlace grupal no debe recibir invitado_ids",
+            )
+
+    elif datos.tipo == "INDIVIDUAL":
+        if datos.responsable_id is not None:
+            raise HTTPException(
+                status_code=422,
+                detail="Un enlace individual no debe recibir responsable_id",
+            )
+
+        if not datos.invitado_ids or len(datos.invitado_ids) != 1:
+            raise HTTPException(
+                status_code=422,
+                detail="Un enlace individual requiere exactamente un invitado",
+            )
 
     conexion = None
 
     try:
-        # El token original se genera una sola vez.
-        token = secrets.token_urlsafe(32)
-
-        # Solo almacenaremos su hash binario SHA-256.
-        token_hash = hashlib.sha256(
-            token.encode("utf-8")
-        ).digest()
-
         conexion = obtener_conexion()
 
         with conexion.cursor() as cursor:
-            marcadores = ", ".join(
-                ["%s"] * len(datos.invitado_ids)
-            )
 
-            cursor.execute(
-                f"""
-                SELECT id
-                FROM invitados
-                WHERE id IN ({marcadores})
-                  AND activo = 1
-                """,
-                tuple(datos.invitado_ids),
-            )
-
-            invitados_encontrados = {
-                fila["id"]
-                for fila in cursor.fetchall()
-            }
-
-            if invitados_encontrados != set(datos.invitado_ids):
-                raise HTTPException(
-                    status_code=404,
-                    detail=(
-                        "Uno o más invitados no existen "
-                        "o están inactivos"
-                    ),
+            if datos.tipo == "RESPONSABLE":
+                # Bloquear el responsable durante la generación.
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM responsables
+                    WHERE id = %s AND activo = 1
+                    FOR UPDATE
+                    """,
+                    (datos.responsable_id,),
                 )
+
+                responsable = cursor.fetchone()
+
+                if not responsable:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="El responsable no existe o está inactivo",
+                    )
+
+                # Obtener todos sus invitados activos.
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM invitados
+                    WHERE responsable_id = %s
+                      AND activo = 1
+                    ORDER BY id
+                    """,
+                    (datos.responsable_id,),
+                )
+
+                invitados = cursor.fetchall()
+
+                if not invitados:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="El responsable todavía no tiene invitados activos",
+                    )
+
+                invitado_ids = [
+                    invitado["id"]
+                    for invitado in invitados
+                ]
+
+                # Revocar cualquier enlace grupal anterior.
+                cursor.execute(
+                    """
+                    UPDATE tokens_invitacion
+                    SET activo = 0,
+                        revocado_en = CURRENT_TIMESTAMP
+                    WHERE responsable_id = %s
+                      AND tipo = 'RESPONSABLE'
+                      AND activo = 1
+                      AND revocado_en IS NULL
+                    """,
+                    (datos.responsable_id,),
+                )
+
+            else:
+                invitado_id = datos.invitado_ids[0]
+
+                # Bloquear el invitado durante la generación.
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM invitados
+                    WHERE id = %s AND activo = 1
+                    FOR UPDATE
+                    """,
+                    (invitado_id,),
+                )
+
+                invitado = cursor.fetchone()
+
+                if not invitado:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="El invitado no existe o está inactivo",
+                    )
+
+                invitado_ids = [invitado_id]
+
+                # Revocar cualquier enlace individual anterior.
+                cursor.execute(
+                    """
+                    UPDATE tokens_invitacion AS t
+                    INNER JOIN invitacion_invitados AS ii
+                        ON ii.token_id = t.id
+                    SET t.activo = 0,
+                        t.revocado_en = CURRENT_TIMESTAMP
+                    WHERE ii.invitado_id = %s
+                      AND t.tipo = 'INDIVIDUAL'
+                      AND t.activo = 1
+                      AND t.revocado_en IS NULL
+                    """,
+                    (invitado_id,),
+                )
+
+            # Generar el token. Solo se almacena su hash.
+            token = secrets.token_urlsafe(32)
+
+            token_hash = hashlib.sha256(
+                token.encode("utf-8")
+            ).digest()
 
             cursor.execute(
                 """
                 INSERT INTO tokens_invitacion (
                     token_hash,
+                    tipo,
+                    responsable_id,
                     activo
                 )
-                VALUES (%s, 1)
+                VALUES (%s, %s, %s, 1)
                 """,
-                (token_hash,),
+                (
+                    token_hash,
+                    datos.tipo,
+                    datos.responsable_id,
+                ),
             )
 
             token_id = cursor.lastrowid
 
+            # Guardar las relaciones iniciales.
             cursor.executemany(
                 """
                 INSERT INTO invitacion_invitados (
@@ -862,7 +962,7 @@ def crear_token(
                 """,
                 [
                     (token_id, invitado_id)
-                    for invitado_id in datos.invitado_ids
+                    for invitado_id in invitado_ids
                 ],
             )
 
@@ -876,10 +976,14 @@ def crear_token(
         return {
             "mensaje": "Token de invitación creado correctamente",
             "token_id": token_id,
+            "tipo": datos.tipo,
+            "responsable_id": datos.responsable_id,
             "token": token,
             "url_invitacion": f"{base_url}/?token={token}",
-            "invitado_ids": datos.invitado_ids,
+            "invitado_ids": invitado_ids,
+            "total_invitados": len(invitado_ids),
         }
+
     except HTTPException:
         if conexion:
             conexion.rollback()
@@ -898,10 +1002,8 @@ def crear_token(
         if conexion:
             conexion.close()
 
-
 @app.get("/invitacion/{token}")
 def consultar_invitacion(token: str):
-    # Rechazar tokens vacíos o excesivamente largos.
     if not token or len(token) > 200:
         raise HTTPException(
             status_code=404,
@@ -920,11 +1022,12 @@ def consultar_invitacion(token: str):
         with conexion.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT id
+                SELECT id, tipo, responsable_id
                 FROM tokens_invitacion
                 WHERE token_hash = %s
                   AND activo = 1
                   AND revocado_en IS NULL
+                LIMIT 1
                 """,
                 (token_hash,),
             )
@@ -937,21 +1040,37 @@ def consultar_invitacion(token: str):
                     detail="Invitación no válida o revocada",
                 )
 
-            cursor.execute(
-                """
-                SELECT
-                    i.id,
-                    i.nombre,
-                    i.asistencia
-                FROM invitacion_invitados AS ii
-                INNER JOIN invitados AS i
-                    ON i.id = ii.invitado_id
-                WHERE ii.token_id = %s
-                  AND i.activo = 1
-                ORDER BY i.nombre
-                """,
-                (registro_token["id"],),
-            )
+            if registro_token["tipo"] == "RESPONSABLE":
+                cursor.execute(
+                    """
+                    SELECT
+                        i.id,
+                        i.nombre,
+                        i.asistencia
+                    FROM invitados AS i
+                    WHERE i.responsable_id = %s
+                      AND i.activo = 1
+                    ORDER BY i.nombre
+                    """,
+                    (registro_token["responsable_id"],),
+                )
+
+            else:
+                cursor.execute(
+                    """
+                    SELECT
+                        i.id,
+                        i.nombre,
+                        i.asistencia
+                    FROM invitacion_invitados AS ii
+                    INNER JOIN invitados AS i
+                        ON i.id = ii.invitado_id
+                    WHERE ii.token_id = %s
+                      AND i.activo = 1
+                    ORDER BY i.nombre
+                    """,
+                    (registro_token["id"],),
+                )
 
             invitados = cursor.fetchall()
 
@@ -962,6 +1081,7 @@ def consultar_invitacion(token: str):
             )
 
         return {
+            "tipo": registro_token["tipo"],
             "invitados": invitados,
             "total_invitados": len(invitados),
         }
@@ -978,7 +1098,6 @@ def consultar_invitacion(token: str):
     finally:
         if conexion:
             conexion.close()
-
 
 @app.patch("/invitacion/{token}/asistencia")
 def responder_invitacion(
@@ -1001,14 +1120,14 @@ def responder_invitacion(
         conexion = obtener_conexion()
 
         with conexion.cursor() as cursor:
-            # Validar que el token exista y siga activo.
             cursor.execute(
                 """
-                SELECT id
+                SELECT id, tipo, responsable_id
                 FROM tokens_invitacion
                 WHERE token_hash = %s
                   AND activo = 1
                   AND revocado_en IS NULL
+                LIMIT 1
                 """,
                 (token_hash,),
             )
@@ -1021,22 +1140,39 @@ def responder_invitacion(
                     detail="Invitación no válida o invitado no autorizado",
                 )
 
-            # Verificar que el invitado pertenezca a este enlace.
-            cursor.execute(
-                """
-                SELECT i.id, i.nombre
-                FROM invitacion_invitados AS ii
-                INNER JOIN invitados AS i
-                    ON i.id = ii.invitado_id
-                WHERE ii.token_id = %s
-                  AND i.id = %s
-                  AND i.activo = 1
-                """,
-                (
-                    registro_token["id"],
-                    datos.invitado_id,
-                ),
-            )
+            if registro_token["tipo"] == "RESPONSABLE":
+                # El invitado debe pertenecer al responsable del enlace.
+                cursor.execute(
+                    """
+                    SELECT id, nombre
+                    FROM invitados
+                    WHERE id = %s
+                      AND responsable_id = %s
+                      AND activo = 1
+                    """,
+                    (
+                        datos.invitado_id,
+                        registro_token["responsable_id"],
+                    ),
+                )
+
+            else:
+                # Enlace individual: solo autoriza al invitado asociado.
+                cursor.execute(
+                    """
+                    SELECT i.id, i.nombre
+                    FROM invitacion_invitados AS ii
+                    INNER JOIN invitados AS i
+                        ON i.id = ii.invitado_id
+                    WHERE ii.token_id = %s
+                      AND i.id = %s
+                      AND i.activo = 1
+                    """,
+                    (
+                        registro_token["id"],
+                        datos.invitado_id,
+                    ),
+                )
 
             invitado = cursor.fetchone()
 
@@ -1093,8 +1229,6 @@ def responder_invitacion(
     finally:
         if conexion:
             conexion.close()
-
-
 @app.patch("/tokens/{token_id}/revocar")
 def revocar_token(
     token_id: int,
@@ -1183,33 +1317,66 @@ def consultar_tokens(
 
         with conexion.cursor() as cursor:
             cursor.execute(
-                """
-                SELECT
-                    t.id,
-                    t.activo,
-                    t.creado_en,
-                    t.revocado_en,
-                    COUNT(
-                        CASE WHEN i.activo = 1 THEN i.id END
-                    ) AS total_invitados,
-                    GROUP_CONCAT(
-                        CASE WHEN i.activo = 1 THEN i.nombre END
-                        ORDER BY i.nombre
-                        SEPARATOR ', '
-                    ) AS nombres_invitados
-                FROM tokens_invitacion AS t
-                LEFT JOIN invitacion_invitados AS ii
-                    ON ii.token_id = t.id
-                LEFT JOIN invitados AS i
-                    ON i.id = ii.invitado_id
-                GROUP BY
-                    t.id,
-                    t.activo,
-                    t.creado_en,
-                    t.revocado_en
-                ORDER BY t.creado_en DESC
-                """
+    """
+    SELECT
+        t.id,
+        t.tipo,
+        t.responsable_id,
+        r.nombre AS responsable_nombre,
+        t.activo,
+        t.creado_en,
+        t.revocado_en,
+
+        CASE
+            WHEN t.tipo = 'RESPONSABLE' THEN (
+                SELECT COUNT(*)
+                FROM invitados AS i
+                WHERE i.responsable_id = t.responsable_id
+                  AND i.activo = 1
             )
+            ELSE (
+                SELECT COUNT(*)
+                FROM invitacion_invitados AS ii
+                INNER JOIN invitados AS i
+                    ON i.id = ii.invitado_id
+                WHERE ii.token_id = t.id
+                  AND i.activo = 1
+            )
+        END AS total_invitados,
+
+        CASE
+            WHEN t.tipo = 'RESPONSABLE' THEN (
+                SELECT GROUP_CONCAT(
+                    i.nombre
+                    ORDER BY i.nombre
+                    SEPARATOR ', '
+                )
+                FROM invitados AS i
+                WHERE i.responsable_id = t.responsable_id
+                  AND i.activo = 1
+            )
+            ELSE (
+                SELECT GROUP_CONCAT(
+                    i.nombre
+                    ORDER BY i.nombre
+                    SEPARATOR ', '
+                )
+                FROM invitacion_invitados AS ii
+                INNER JOIN invitados AS i
+                    ON i.id = ii.invitado_id
+                WHERE ii.token_id = t.id
+                  AND i.activo = 1
+            )
+        END AS nombres_invitados
+
+    FROM tokens_invitacion AS t
+
+    LEFT JOIN responsables AS r
+        ON r.id = t.responsable_id
+
+    ORDER BY t.creado_en DESC
+    """
+)
 
             tokens = cursor.fetchall()
 
