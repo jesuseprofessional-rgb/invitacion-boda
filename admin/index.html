@@ -97,12 +97,14 @@
                         <span class="module-status">En desarrollo</span>
                     </article>
 
-                    <article class="module-card">
-                        <span class="module-number">04</span>
-                        <h3>Confirmaciones</h3>
-                        <p>Consultar quién confirmó, declinó o está pendiente.</p>
-                        <span class="module-status">En desarrollo</span>
-                    </article>
+                    <button class="module-card module-button"
+        type="button"
+        data-module="confirmaciones">
+    <span class="module-number">04</span>
+    <h3>Confirmaciones</h3>
+    <p>Consultar y administrar las respuestas de asistencia.</p>
+    <span class="module-status">Abrir módulo</span>
+</button>
 
                     <button class="module-card module-button"
         type="button"
@@ -561,6 +563,161 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+</section>
+<!-- Módulo de confirmaciones -->
+<section id="confirmaciones-view" hidden>
+
+    <div class="module-toolbar">
+        <button type="button"
+                class="button-secondary"
+                id="back-home-confirmaciones">
+            ← Volver al inicio
+        </button>
+
+        <div>
+            <p class="eyebrow">MÓDULO 04</p>
+            <h2>Confirmaciones</h2>
+            <p class="description">
+                Seguimiento general de asistencia de los invitados.
+            </p>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+
+        <article class="stat-card">
+            <span>Total de invitados</span>
+            <strong id="confirmaciones-total">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Confirmados</span>
+            <strong id="confirmaciones-confirmados">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Declinados</span>
+            <strong id="confirmaciones-declinados">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Pendientes</span>
+            <strong id="confirmaciones-pendientes">0</strong>
+        </article>
+
+    </div>
+
+    <!-- Progreso -->
+    <div class="content-card">
+
+        <div class="content-heading">
+            <h3>Progreso de confirmación</h3>
+            <p id="confirmaciones-progreso-texto">
+                Todavía no hay respuestas registradas.
+            </p>
+        </div>
+
+        <div class="progress-track"
+             role="progressbar"
+             id="confirmaciones-progreso"
+             aria-label="Porcentaje de invitados que han respondido"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="0">
+
+            <div id="confirmaciones-progreso-barra"></div>
+
+        </div>
+
+    </div>
+
+    <!-- Listado y filtros -->
+    <div class="content-card">
+
+        <div class="content-heading list-heading">
+
+            <div>
+                <h3>Control de asistencia</h3>
+                <p>
+                    Consulta las respuestas y actualiza manualmente
+                    la asistencia cuando sea necesario.
+                </p>
+            </div>
+
+            <button type="button"
+                    class="button-secondary"
+                    id="refresh-confirmaciones">
+                Actualizar
+            </button>
+
+        </div>
+
+        <div class="responsable-form">
+
+            <div class="form-field">
+                <label for="confirmaciones-busqueda">
+                    Buscar invitado o responsable
+                </label>
+
+                <input type="search"
+                       id="confirmaciones-busqueda"
+                       placeholder="Escribe un nombre...">
+            </div>
+
+            <div class="form-field">
+                <label for="confirmaciones-filtro">
+                    Estado de asistencia
+                </label>
+
+                <select id="confirmaciones-filtro">
+                    <option value="TODOS">Todos los estados</option>
+                    <option value="CONFIRMADO">Confirmados</option>
+                    <option value="DECLINADO">Declinados</option>
+                    <option value="PENDIENTE">Pendientes</option>
+                </select>
+            </div>
+
+        </div>
+
+        <p id="confirmaciones-resultados"
+           class="description"
+           role="status">
+        </p>
+
+        <div class="table-container">
+
+            <table class="admin-table">
+
+                <thead>
+                    <tr>
+                        <th>Invitado</th>
+                        <th>Responsable</th>
+                        <th>Mesa</th>
+                        <th>Asistencia</th>
+                        <th>Actualizar</th>
+                    </tr>
+                </thead>
+
+                <tbody id="confirmaciones-table-body">
+                    <tr>
+                        <td colspan="5" class="empty-cell">
+                            Abre el módulo para consultar las confirmaciones.
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <p id="confirmaciones-message"
+           class="message"
+           role="status">
+        </p>
+
     </div>
 
 </section>

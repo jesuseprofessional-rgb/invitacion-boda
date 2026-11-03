@@ -15,7 +15,33 @@ const homeView = document.getElementById("home-view");
 const responsablesView = document.getElementById("responsables-view");
 
 const invitadosView = document.getElementById("invitados-view");
+// Referencias del módulo Confirmaciones
 
+const confirmacionesView = document.getElementById(
+    "confirmaciones-view"
+);
+
+const confirmacionesTableBody = document.getElementById(
+    "confirmaciones-table-body"
+);
+
+const confirmacionesBusqueda = document.getElementById(
+    "confirmaciones-busqueda"
+);
+
+const confirmacionesFiltro = document.getElementById(
+    "confirmaciones-filtro"
+);
+
+const confirmacionesMessage = document.getElementById(
+    "confirmaciones-message"
+);
+
+const confirmacionesResultados = document.getElementById(
+    "confirmaciones-resultados"
+);
+
+let confirmacionesActuales = [];
 const invitadosForm = document.getElementById("invitados-form");
 const invitadosResponsableSelect = document.getElementById(
     "invitados-responsable"
@@ -111,6 +137,7 @@ function mostrarInicio() {
     invitadosView.hidden = true;
     invitadosResponsableCard.hidden = true;
     enlacesView.hidden = true;
+    confirmacionesView.hidden = true;
 }
 
 function mostrarResponsables() {
@@ -118,6 +145,7 @@ function mostrarResponsables() {
     responsablesView.hidden = false;
     invitadosView.hidden = true;
     enlacesView.hidden = true;
+    confirmacionesView.hidden = true;
 
     cargarResponsables();
 }
@@ -127,6 +155,7 @@ function mostrarInvitados() {
     responsablesView.hidden = true;
     invitadosView.hidden = false;
     enlacesView.hidden = true;
+    confirmacionesView.hidden = true;
 
     cargarResponsablesSelect();
     cargarTodosInvitados();
@@ -137,9 +166,19 @@ function mostrarEnlaces() {
     responsablesView.hidden = true;
     invitadosView.hidden = true;
     enlacesView.hidden = false;
+    confirmacionesView.hidden = true;
 
     cargarOpcionesEnlaces();
     cargarEnlaces();
+}
+function mostrarConfirmaciones() {
+    homeView.hidden = true;
+    responsablesView.hidden = true;
+    invitadosView.hidden = true;
+    enlacesView.hidden = true;
+    confirmacionesView.hidden = false;
+
+    cargarConfirmaciones();
 }
 
 function mostrarError(mensaje) {
@@ -292,6 +331,9 @@ document.addEventListener("click", (event) => {
     if (modulo === "enlaces") {
     mostrarEnlaces();
     }
+    if (modulo === "confirmaciones") {
+    mostrarConfirmaciones();
+}
 });
 document.getElementById("back-home-invitados").addEventListener(
     "click",
@@ -310,7 +352,25 @@ document.getElementById("refresh-invitados").addEventListener(
     "click",
     cargarTodosInvitados
 );
+document.getElementById("back-home-confirmaciones").addEventListener(
+    "click",
+    mostrarInicio
+);
 
+document.getElementById("refresh-confirmaciones").addEventListener(
+    "click",
+    cargarConfirmaciones
+);
+
+confirmacionesBusqueda.addEventListener(
+    "input",
+    renderizarConfirmaciones
+);
+
+confirmacionesFiltro.addEventListener(
+    "change",
+    renderizarConfirmaciones
+);
 document.getElementById("agregar-invitado").addEventListener(
     "click",
     agregarCampoInvitado
@@ -1276,5 +1336,313 @@ enlacesTableBody.addEventListener("click", async (event) => {
 
         boton.disabled = false;
         boton.textContent = "Revocar";
+    }
+});
+// --------------------------------------------------
+// Confirmaciones: consultar información
+// --------------------------------------------------
+
+async function cargarConfirmaciones() {
+
+    confirmacionesTableBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="empty-cell">
+                Consultando confirmaciones...
+            </td>
+        </tr>
+    `;
+
+    limpiarMensaje(confirmacionesMessage);
+
+    try {
+
+        const datos = await solicitarAPI("/invitados");
+
+        confirmacionesActuales = datos.invitados || [];
+
+        const total = confirmacionesActuales.length;
+
+        const confirmados = confirmacionesActuales.filter(
+            invitado => invitado.asistencia === "CONFIRMADO"
+        ).length;
+
+        const declinados = confirmacionesActuales.filter(
+            invitado => invitado.asistencia === "DECLINADO"
+        ).length;
+
+        const pendientes = confirmacionesActuales.filter(
+            invitado => invitado.asistencia === "PENDIENTE"
+        ).length;
+
+        const respondidos = confirmados + declinados;
+
+        const porcentaje = total > 0
+            ? Math.round((respondidos / total) * 100)
+            : 0;
+
+        // Actualizar estadísticas.
+
+        document.getElementById("confirmaciones-total").textContent =
+            total;
+
+        document.getElementById("confirmaciones-confirmados").textContent =
+            confirmados;
+
+        document.getElementById("confirmaciones-declinados").textContent =
+            declinados;
+
+        document.getElementById("confirmaciones-pendientes").textContent =
+            pendientes;
+
+        // Actualizar progreso.
+
+        document.getElementById(
+            "confirmaciones-progreso-texto"
+        ).textContent = total > 0
+            ? `${respondidos} de ${total} invitados han respondido (${porcentaje}%).`
+            : "Todavía no hay invitados registrados.";
+
+        const barra = document.getElementById(
+            "confirmaciones-progreso-barra"
+        );
+
+        barra.style.width = `${porcentaje}%`;
+
+        document.getElementById(
+            "confirmaciones-progreso"
+        ).setAttribute("aria-valuenow", porcentaje);
+
+        renderizarConfirmaciones();
+
+    } catch (error) {
+
+        confirmacionesTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty-cell error-text">
+                    ${escaparHTML(error.message)}
+                </td>
+            </tr>
+        `;
+
+        mostrarMensaje(
+            confirmacionesMessage,
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+// --------------------------------------------------
+// Confirmaciones: buscar y filtrar
+// --------------------------------------------------
+
+function renderizarConfirmaciones() {
+
+    const busqueda = confirmacionesBusqueda.value
+        .trim()
+        .toLocaleLowerCase("es-MX");
+
+    const filtro = confirmacionesFiltro.value;
+
+    const invitadosFiltrados = confirmacionesActuales.filter(
+        invitado => {
+
+            const nombre = String(invitado.nombre || "")
+                .toLocaleLowerCase("es-MX");
+
+            const responsable = String(
+                invitado.responsable_nombre || ""
+            ).toLocaleLowerCase("es-MX");
+
+            const coincideBusqueda =
+                nombre.includes(busqueda) ||
+                responsable.includes(busqueda);
+
+            const coincideEstado =
+                filtro === "TODOS" ||
+                invitado.asistencia === filtro;
+
+            return coincideBusqueda && coincideEstado;
+        }
+    );
+
+    confirmacionesResultados.textContent =
+        `Mostrando ${invitadosFiltrados.length} de ${confirmacionesActuales.length} invitados.`;
+
+    if (invitadosFiltrados.length === 0) {
+
+        confirmacionesTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty-cell">
+                    No se encontraron invitados con esos criterios.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    confirmacionesTableBody.innerHTML = "";
+
+    invitadosFiltrados.forEach((invitado) => {
+
+        const fila = document.createElement("tr");
+
+        const mesa = invitado.mesa === null ||
+                     invitado.mesa === ""
+            ? "Sin asignar"
+            : String(invitado.mesa);
+
+        fila.innerHTML = `
+            <td>
+                ${escaparHTML(invitado.nombre)}
+            </td>
+
+            <td>
+                ${escaparHTML(invitado.responsable_nombre || "—")}
+            </td>
+
+            <td>
+                ${escaparHTML(mesa)}
+            </td>
+
+            <td>
+                <span class="attendance-status ${claseAsistencia(invitado.asistencia)}">
+                    ${escaparHTML(invitado.asistencia)}
+                </span>
+            </td>
+
+            <td>
+                <div class="confirmation-edit">
+
+                    <select
+                        class="confirmation-select"
+                        data-asistencia-id="${Number(invitado.id)}"
+                        aria-label="Cambiar asistencia de ${escaparHTML(invitado.nombre)}">
+
+                        <option value="PENDIENTE"
+                            ${invitado.asistencia === "PENDIENTE" ? "selected" : ""}>
+                            Pendiente
+                        </option>
+
+                        <option value="CONFIRMADO"
+                            ${invitado.asistencia === "CONFIRMADO" ? "selected" : ""}>
+                            Confirmado
+                        </option>
+
+                        <option value="DECLINADO"
+                            ${invitado.asistencia === "DECLINADO" ? "selected" : ""}>
+                            Declinado
+                        </option>
+
+                    </select>
+
+                    <button
+                        type="button"
+                        class="table-action confirmation-save-button"
+                        data-invitado-id="${Number(invitado.id)}">
+
+                        Guardar
+
+                    </button>
+
+                </div>
+            </td>
+        `;
+
+        confirmacionesTableBody.appendChild(fila);
+    });
+}
+
+
+// --------------------------------------------------
+// Confirmaciones: actualizar asistencia manualmente
+// --------------------------------------------------
+
+confirmacionesTableBody.addEventListener("click", async (event) => {
+
+    const boton = event.target.closest(
+        ".confirmation-save-button"
+    );
+
+    if (!boton) {
+        return;
+    }
+
+    const invitadoId = Number(boton.dataset.invitadoId);
+
+    if (!invitadoId) {
+        return;
+    }
+
+    const select = confirmacionesTableBody.querySelector(
+        `[data-asistencia-id="${invitadoId}"]`
+    );
+
+    if (!select) {
+        return;
+    }
+
+    const asistencia = select.value;
+
+    const invitado = confirmacionesActuales.find(
+        item => Number(item.id) === invitadoId
+    );
+
+    if (!invitado) {
+        mostrarMensaje(
+            confirmacionesMessage,
+            "No se encontró el invitado seleccionado.",
+            "error"
+        );
+        return;
+    }
+
+    if (invitado.asistencia === asistencia) {
+        mostrarMensaje(
+            confirmacionesMessage,
+            "La asistencia ya tiene ese estado.",
+            ""
+        );
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = "Guardando...";
+
+    try {
+
+        await solicitarAPI(
+            `/invitados/${invitadoId}/asistencia`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    asistencia
+                })
+            }
+        );
+
+        mostrarMensaje(
+            confirmacionesMessage,
+            `Asistencia de ${invitado.nombre} actualizada correctamente.`,
+            "success"
+        );
+
+        await cargarConfirmaciones();
+
+    } catch (error) {
+
+        mostrarMensaje(
+            confirmacionesMessage,
+            error.message,
+            "error"
+        );
+
+        boton.disabled = false;
+        boton.textContent = "Guardar";
     }
 });

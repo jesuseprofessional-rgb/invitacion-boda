@@ -1002,6 +1002,7 @@ def crear_token(
         if conexion:
             conexion.close()
 
+
 @app.get("/invitacion/{token}")
 def consultar_invitacion(token: str):
     if not token or len(token) > 200:
@@ -1022,11 +1023,23 @@ def consultar_invitacion(token: str):
         with conexion.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT id, tipo, responsable_id
-                FROM tokens_invitacion
-                WHERE token_hash = %s
-                  AND activo = 1
-                  AND revocado_en IS NULL
+                SELECT
+                    t.id,
+                    t.tipo,
+                    t.responsable_id
+                FROM tokens_invitacion AS t
+                LEFT JOIN responsables AS r
+                    ON r.id = t.responsable_id
+                WHERE t.token_hash = %s
+                  AND t.activo = 1
+                  AND t.revocado_en IS NULL
+                  AND (
+                      t.tipo = 'INDIVIDUAL'
+                      OR (
+                          t.tipo = 'RESPONSABLE'
+                          AND r.activo = 1
+                      )
+                  )
                 LIMIT 1
                 """,
                 (token_hash,),
@@ -1099,6 +1112,7 @@ def consultar_invitacion(token: str):
         if conexion:
             conexion.close()
 
+
 @app.patch("/invitacion/{token}/asistencia")
 def responder_invitacion(
     token: str,
@@ -1120,14 +1134,28 @@ def responder_invitacion(
         conexion = obtener_conexion()
 
         with conexion.cursor() as cursor:
+            # Bloquear el token mientras se procesa la respuesta.
             cursor.execute(
                 """
-                SELECT id, tipo, responsable_id
-                FROM tokens_invitacion
-                WHERE token_hash = %s
-                  AND activo = 1
-                  AND revocado_en IS NULL
+                SELECT
+                    t.id,
+                    t.tipo,
+                    t.responsable_id
+                FROM tokens_invitacion AS t
+                LEFT JOIN responsables AS r
+                    ON r.id = t.responsable_id
+                WHERE t.token_hash = %s
+                  AND t.activo = 1
+                  AND t.revocado_en IS NULL
+                  AND (
+                      t.tipo = 'INDIVIDUAL'
+                      OR (
+                          t.tipo = 'RESPONSABLE'
+                          AND r.activo = 1
+                      )
+                  )
                 LIMIT 1
+                FOR UPDATE
                 """,
                 (token_hash,),
             )
@@ -1141,7 +1169,6 @@ def responder_invitacion(
                 )
 
             if registro_token["tipo"] == "RESPONSABLE":
-                # El invitado debe pertenecer al responsable del enlace.
                 cursor.execute(
                     """
                     SELECT id, nombre
@@ -1149,6 +1176,7 @@ def responder_invitacion(
                     WHERE id = %s
                       AND responsable_id = %s
                       AND activo = 1
+                    FOR UPDATE
                     """,
                     (
                         datos.invitado_id,
@@ -1157,7 +1185,6 @@ def responder_invitacion(
                 )
 
             else:
-                # Enlace individual: solo autoriza al invitado asociado.
                 cursor.execute(
                     """
                     SELECT i.id, i.nombre
@@ -1167,6 +1194,7 @@ def responder_invitacion(
                     WHERE ii.token_id = %s
                       AND i.id = %s
                       AND i.activo = 1
+                    FOR UPDATE
                     """,
                     (
                         registro_token["id"],
@@ -1229,6 +1257,7 @@ def responder_invitacion(
     finally:
         if conexion:
             conexion.close()
+
 @app.patch("/tokens/{token_id}/revocar")
 def revocar_token(
     token_id: int,
