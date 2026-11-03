@@ -104,12 +104,14 @@
                         <span class="module-status">En desarrollo</span>
                     </article>
 
-                    <article class="module-card">
-                        <span class="module-number">05</span>
-                        <h3>Enlaces</h3>
-                        <p>Consultar invitaciones generadas y revocar enlaces.</p>
-                        <span class="module-status">En desarrollo</span>
-                    </article>
+                    <button class="module-card module-button"
+        type="button"
+        data-module="enlaces">
+    <span class="module-number">05</span>
+    <h3>Enlaces</h3>
+    <p>Generar, compartir y administrar enlaces de invitación.</p>
+    <span class="module-status">Abrir módulo</span>
+</button>
                 </div>
             </section>
 
@@ -402,7 +404,166 @@
     </div>
 
 </section>
+<!-- Módulo de enlaces -->
+<section id="enlaces-view" hidden>
 
+    <div class="module-toolbar">
+        <button type="button"
+                class="button-secondary"
+                id="back-home-enlaces">
+            ← Volver al inicio
+        </button>
+
+        <div>
+            <p class="eyebrow">MÓDULO 05</p>
+            <h2>Enlaces de invitación</h2>
+            <p class="description">
+                Genera, comparte y administra los accesos a las invitaciones.
+            </p>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span>Enlaces activos</span>
+            <strong id="enlaces-activos">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Enlaces grupales</span>
+            <strong id="enlaces-grupales">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Enlaces individuales</span>
+            <strong id="enlaces-individuales">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Enlaces revocados</span>
+            <strong id="enlaces-revocados">0</strong>
+        </article>
+    </div>
+
+    <!-- Generación -->
+    <div class="content-card">
+        <div class="content-heading">
+            <h3>Generar enlace</h3>
+            <p>
+                Selecciona si deseas crear un enlace para un grupo
+                o para una persona.
+            </p>
+        </div>
+
+        <form id="enlaces-form">
+
+            <div class="form-field">
+                <label for="enlaces-tipo">Tipo de enlace *</label>
+                <select id="enlaces-tipo" required>
+                    <option value="RESPONSABLE">Grupal · Responsable</option>
+                    <option value="INDIVIDUAL">Individual · Invitado</option>
+                </select>
+            </div>
+
+            <div class="form-field enlaces-selector" id="enlaces-responsable-field">
+                <label for="enlaces-responsable">Responsable *</label>
+                <select id="enlaces-responsable">
+                    <option value="">Selecciona un responsable</option>
+                </select>
+                <small>
+                    El enlace incluirá a todos los invitados activos del responsable.
+                </small>
+            </div>
+
+            <div class="form-field enlaces-selector" id="enlaces-invitado-field" hidden>
+                <label for="enlaces-invitado">Invitado *</label>
+                <select id="enlaces-invitado">
+                    <option value="">Selecciona un invitado</option>
+                </select>
+                <small>
+                    El enlace permitirá consultar y responder únicamente a esta persona.
+                </small>
+            </div>
+
+            <div class="invitados-form-actions">
+                <button type="submit" id="generar-enlace-button">
+                    Generar enlace
+                </button>
+            </div>
+
+            <p id="enlaces-form-message" class="message" role="status"></p>
+
+            <!-- Resultado de generación -->
+            <div id="enlace-generado" class="enlace-generado" hidden>
+                <div class="content-heading">
+                    <h3>Enlace generado correctamente</h3>
+                    <p>
+                        Copia y comparte este enlace. Por seguridad,
+                        no volverá a mostrarse después de salir de esta pantalla.
+                    </p>
+                </div>
+
+                <label for="enlace-generado-url">URL de invitación</label>
+
+                <div class="enlace-copy-row">
+                    <input type="text"
+                           id="enlace-generado-url"
+                           readonly>
+                    <button type="button"
+                            class="button-secondary"
+                            id="copiar-enlace-generado">
+                        Copiar
+                    </button>
+                </div>
+
+                <p id="enlace-generado-destinatario"></p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Listado -->
+    <div class="content-card">
+        <div class="content-heading list-heading">
+            <div>
+                <h3>Enlaces registrados</h3>
+                <p>
+                    Consulta los enlaces activos y revocados.
+                </p>
+            </div>
+
+            <button type="button"
+                    class="button-secondary"
+                    id="refresh-enlaces">
+                Actualizar
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Destinatario</th>
+                        <th>Tipo</th>
+                        <th>Invitados</th>
+                        <th>Creado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="enlaces-table-body">
+                    <tr>
+                        <td colspan="6" class="empty-cell">
+                            Cargando enlaces...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
             <p id="dashboard-message" class="message" role="status"></p>
         </section>
     </main>

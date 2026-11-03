@@ -51,6 +51,42 @@ const invitadosResponsableCard = document.getElementById(
 const invitadosTableBody = document.getElementById(
     "invitados-table-body"
 );
+// Referencias del módulo Enlaces
+const enlacesView = document.getElementById("enlaces-view");
+const enlacesForm = document.getElementById("enlaces-form");
+const enlacesTipo = document.getElementById("enlaces-tipo");
+
+const enlacesResponsableField = document.getElementById(
+    "enlaces-responsable-field"
+);
+const enlacesResponsableSelect = document.getElementById(
+    "enlaces-responsable"
+);
+
+const enlacesInvitadoField = document.getElementById(
+    "enlaces-invitado-field"
+);
+const enlacesInvitadoSelect = document.getElementById(
+    "enlaces-invitado"
+);
+
+const generarEnlaceButton = document.getElementById(
+    "generar-enlace-button"
+);
+const enlacesFormMessage = document.getElementById(
+    "enlaces-form-message"
+);
+const enlacesTableBody = document.getElementById(
+    "enlaces-table-body"
+);
+
+const enlaceGenerado = document.getElementById("enlace-generado");
+const enlaceGeneradoUrl = document.getElementById("enlace-generado-url");
+const enlaceGeneradoDestinatario = document.getElementById(
+    "enlace-generado-destinatario"
+);
+
+let enlacesActuales = [];
 
 let responsablesActuales = [];
 
@@ -74,12 +110,14 @@ function mostrarInicio() {
     responsablesView.hidden = true;
     invitadosView.hidden = true;
     invitadosResponsableCard.hidden = true;
+    enlacesView.hidden = true;
 }
 
 function mostrarResponsables() {
     homeView.hidden = true;
     responsablesView.hidden = false;
     invitadosView.hidden = true;
+    enlacesView.hidden = true;
 
     cargarResponsables();
 }
@@ -88,9 +126,20 @@ function mostrarInvitados() {
     homeView.hidden = true;
     responsablesView.hidden = true;
     invitadosView.hidden = false;
+    enlacesView.hidden = true;
 
     cargarResponsablesSelect();
     cargarTodosInvitados();
+}
+
+function mostrarEnlaces() {
+    homeView.hidden = true;
+    responsablesView.hidden = true;
+    invitadosView.hidden = true;
+    enlacesView.hidden = false;
+
+    cargarOpcionesEnlaces();
+    cargarEnlaces();
 }
 
 function mostrarError(mensaje) {
@@ -239,13 +288,24 @@ document.addEventListener("click", (event) => {
     }
     if (modulo === "invitados") {
     mostrarInvitados();
-}
+    }
+    if (modulo === "enlaces") {
+    mostrarEnlaces();
+    }
 });
 document.getElementById("back-home-invitados").addEventListener(
     "click",
     mostrarInicio
 );
+document.getElementById("back-home-enlaces").addEventListener(
+    "click",
+    mostrarInicio
+);
 
+document.getElementById("refresh-enlaces").addEventListener(
+    "click",
+    cargarEnlaces
+);
 document.getElementById("refresh-invitados").addEventListener(
     "click",
     cargarTodosInvitados
@@ -831,3 +891,390 @@ async function cargarTodosInvitados() {
         `;
     }
 }
+// --------------------------------------------------
+// Enlaces: cargar opciones de destinatarios
+// --------------------------------------------------
+
+async function cargarOpcionesEnlaces() {
+    enlacesResponsableSelect.innerHTML = `
+        <option value="">Cargando responsables...</option>
+    `;
+
+    enlacesInvitadoSelect.innerHTML = `
+        <option value="">Cargando invitados...</option>
+    `;
+
+    try {
+        const [datosResponsables, datosInvitados] = await Promise.all([
+            solicitarAPI("/responsables"),
+            solicitarAPI("/invitados")
+        ]);
+
+        enlacesResponsableSelect.innerHTML = `
+            <option value="">Selecciona un responsable</option>
+        `;
+
+        (datosResponsables.responsables || []).forEach((responsable) => {
+            const opcion = document.createElement("option");
+            opcion.value = responsable.id;
+            opcion.textContent = responsable.nombre;
+
+            enlacesResponsableSelect.appendChild(opcion);
+        });
+
+        enlacesInvitadoSelect.innerHTML = `
+            <option value="">Selecciona un invitado</option>
+        `;
+
+        (datosInvitados.invitados || []).forEach((invitado) => {
+            const opcion = document.createElement("option");
+            opcion.value = invitado.id;
+            opcion.textContent =
+                `${invitado.nombre} — ${invitado.responsable_nombre}`;
+
+            enlacesInvitadoSelect.appendChild(opcion);
+        });
+
+    } catch (error) {
+        enlacesResponsableSelect.innerHTML = `
+            <option value="">Error al cargar responsables</option>
+        `;
+
+        enlacesInvitadoSelect.innerHTML = `
+            <option value="">Error al cargar invitados</option>
+        `;
+
+        mostrarMensaje(
+            enlacesFormMessage,
+            error.message,
+            "error"
+        );
+    }
+}
+
+// --------------------------------------------------
+// Enlaces: cambiar modalidad
+// --------------------------------------------------
+
+enlacesTipo.addEventListener("change", () => {
+    const grupal = enlacesTipo.value === "RESPONSABLE";
+
+    enlacesResponsableField.hidden = !grupal;
+    enlacesInvitadoField.hidden = grupal;
+
+    limpiarMensaje(enlacesFormMessage);
+    enlaceGenerado.hidden = true;
+});
+
+// --------------------------------------------------
+// Enlaces: consultar listado
+// --------------------------------------------------
+
+async function cargarEnlaces() {
+    enlacesTableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="empty-cell">
+                Consultando enlaces...
+            </td>
+        </tr>
+    `;
+
+    try {
+        const datos = await solicitarAPI("/tokens");
+
+        enlacesActuales = datos.tokens || [];
+
+        const activos = enlacesActuales.filter(
+            token => Number(token.activo) === 1
+        );
+
+        const grupales = enlacesActuales.filter(
+            token => token.tipo === "RESPONSABLE"
+        );
+
+        const individuales = enlacesActuales.filter(
+            token => token.tipo === "INDIVIDUAL"
+        );
+
+        const revocados = enlacesActuales.filter(
+            token => Number(token.activo) === 0
+        );
+
+        document.getElementById("enlaces-activos").textContent =
+            activos.length;
+
+        document.getElementById("enlaces-grupales").textContent =
+            grupales.length;
+
+        document.getElementById("enlaces-individuales").textContent =
+            individuales.length;
+
+        document.getElementById("enlaces-revocados").textContent =
+            revocados.length;
+
+        if (enlacesActuales.length === 0) {
+            enlacesTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-cell">
+                        Todavía no se han generado enlaces.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        enlacesTableBody.innerHTML = "";
+
+        enlacesActuales.forEach((token) => {
+            const activo = Number(token.activo) === 1;
+
+            const destinatario = token.tipo === "RESPONSABLE"
+                ? token.responsable_nombre || "Responsable"
+                : token.nombres_invitados || "Invitado";
+
+            const tipo = token.tipo === "RESPONSABLE"
+                ? "Grupal"
+                : "Individual";
+
+            const fecha = token.creado_en
+                ? new Date(token.creado_en).toLocaleString("es-MX", {
+                    dateStyle: "short",
+                    timeStyle: "short"
+                })
+                : "—";
+
+            const fila = document.createElement("tr");
+
+            fila.innerHTML = `
+                <td>${escaparHTML(destinatario)}</td>
+                <td>${tipo}</td>
+                <td>${Number(token.total_invitados || 0)}</td>
+                <td>${escaparHTML(fecha)}</td>
+                <td>
+                    <span class="attendance-status ${
+                        activo ? "confirmed" : "declined"
+                    }">
+                        ${activo ? "Activo" : "Revocado"}
+                    </span>
+                </td>
+                <td>
+                    ${
+                        activo
+                            ? `
+                                <button
+                                    type="button"
+                                    class="table-action revoke-link-button"
+                                    data-token-id="${Number(token.id)}">
+                                    Revocar
+                                </button>
+                            `
+                            : "—"
+                    }
+                </td>
+            `;
+
+            enlacesTableBody.appendChild(fila);
+        });
+
+    } catch (error) {
+        enlacesTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-cell error-text">
+                    ${escaparHTML(error.message)}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// --------------------------------------------------
+// Enlaces: generar
+// --------------------------------------------------
+
+enlacesForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    limpiarMensaje(enlacesFormMessage);
+    enlaceGenerado.hidden = true;
+
+    const tipo = enlacesTipo.value;
+
+    let cuerpo;
+    let destinatario;
+
+    if (tipo === "RESPONSABLE") {
+        const responsableId = Number(
+            enlacesResponsableSelect.value
+        );
+
+        if (!responsableId) {
+            mostrarMensaje(
+                enlacesFormMessage,
+                "Selecciona un responsable.",
+                "error"
+            );
+            return;
+        }
+
+        const responsable = responsablesActuales.find(
+            item => Number(item.id) === responsableId
+        );
+
+        // responsablesActuales puede estar desactualizado;
+        // se consulta la opción seleccionada como respaldo.
+        destinatario = enlacesResponsableSelect.selectedOptions[0].textContent;
+
+        cuerpo = {
+            tipo: "RESPONSABLE",
+            responsable_id: responsableId
+        };
+
+    } else {
+        const invitadoId = Number(
+            enlacesInvitadoSelect.value
+        );
+
+        if (!invitadoId) {
+            mostrarMensaje(
+                enlacesFormMessage,
+                "Selecciona un invitado.",
+                "error"
+            );
+            return;
+        }
+
+        destinatario = enlacesInvitadoSelect.selectedOptions[0].textContent;
+
+        cuerpo = {
+            tipo: "INDIVIDUAL",
+            invitado_ids: [invitadoId]
+        };
+    }
+
+    
+    generarEnlaceButton.disabled = true;
+    generarEnlaceButton.textContent = "Generando...";
+
+    try {
+        const resultado = await solicitarAPI("/tokens", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(cuerpo)
+        });
+
+        enlaceGeneradoUrl.value = resultado.url_invitacion;
+
+        enlaceGeneradoDestinatario.textContent =
+            `${destinatario} · ${resultado.total_invitados} invitado(s)`;
+
+        enlaceGenerado.hidden = false;
+
+        mostrarMensaje(
+            enlacesFormMessage,
+            "El enlace se generó correctamente. Cópialo antes de salir de esta pantalla.",
+            "success"
+        );
+
+        await cargarEnlaces();
+
+    } catch (error) {
+        mostrarMensaje(
+            enlacesFormMessage,
+            error.message,
+            "error"
+        );
+    } finally {
+        generarEnlaceButton.disabled = false;
+        generarEnlaceButton.textContent = "Generar enlace";
+    }
+});
+
+// --------------------------------------------------
+// Enlaces: copiar enlace generado
+// --------------------------------------------------
+
+document.getElementById("copiar-enlace-generado").addEventListener(
+    "click",
+    async () => {
+        try {
+            await navigator.clipboard.writeText(
+                enlaceGeneradoUrl.value
+            );
+
+            mostrarMensaje(
+                enlacesFormMessage,
+                "Enlace copiado al portapapeles.",
+                "success"
+            );
+
+        } catch {
+            enlaceGeneradoUrl.select();
+
+            const copiado = document.execCommand("copy");
+
+            mostrarMensaje(
+                enlacesFormMessage,
+                copiado
+                    ? "Enlace copiado al portapapeles."
+                    : "No fue posible copiar automáticamente. Selecciona y copia el enlace.",
+                copiado ? "success" : "error"
+            );
+        }
+    }
+);
+
+// --------------------------------------------------
+// Enlaces: revocar
+// --------------------------------------------------
+
+enlacesTableBody.addEventListener("click", async (event) => {
+    const boton = event.target.closest(".revoke-link-button");
+
+    if (!boton) {
+        return;
+    }
+
+    const tokenId = Number(boton.dataset.tokenId);
+
+    if (!tokenId) {
+        return;
+    }
+
+    const confirmar = confirm(
+        "¿Deseas revocar este enlace? " +
+        "Dejará de funcionar inmediatamente."
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    boton.disabled = true;
+    boton.textContent = "Revocando...";
+
+    try {
+        await solicitarAPI(`/tokens/${tokenId}/revocar`, {
+            method: "PATCH"
+        });
+
+        mostrarMensaje(
+            enlacesFormMessage,
+            "El enlace fue revocado correctamente.",
+            "success"
+        );
+
+        await cargarEnlaces();
+
+    } catch (error) {
+        mostrarMensaje(
+            enlacesFormMessage,
+            error.message,
+            "error"
+        );
+
+        boton.disabled = false;
+        boton.textContent = "Revocar";
+    }
+});
