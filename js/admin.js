@@ -14,6 +14,28 @@ const dashboardMessage = document.getElementById("dashboard-message");
 const homeView = document.getElementById("home-view");
 const responsablesView = document.getElementById("responsables-view");
 
+const invitadosView = document.getElementById("invitados-view");
+
+const invitadosForm = document.getElementById("invitados-form");
+const invitadosResponsableSelect = document.getElementById(
+    "invitados-responsable"
+);
+const invitadosFields = document.getElementById("invitados-fields");
+const invitadosFormMessage = document.getElementById(
+    "invitados-form-message"
+);
+const invitadosResultados = document.getElementById(
+    "invitados-resultados"
+);
+const registrarInvitadosButton = document.getElementById(
+    "registrar-invitados-button"
+);
+const invitadosGeneralTable = document.getElementById(
+    "invitados-general-table"
+);
+
+let invitadosActuales = [];
+
 const responsableForm = document.getElementById("responsable-form");
 const responsableSubmit = document.getElementById("responsable-submit");
 const responsableMessage = document.getElementById("responsable-message");
@@ -50,13 +72,25 @@ function mostrarDashboard() {
 function mostrarInicio() {
     homeView.hidden = false;
     responsablesView.hidden = true;
+    invitadosView.hidden = true;
     invitadosResponsableCard.hidden = true;
 }
 
 function mostrarResponsables() {
     homeView.hidden = true;
     responsablesView.hidden = false;
+    invitadosView.hidden = true;
+
     cargarResponsables();
+}
+
+function mostrarInvitados() {
+    homeView.hidden = true;
+    responsablesView.hidden = true;
+    invitadosView.hidden = false;
+
+    cargarResponsablesSelect();
+    cargarTodosInvitados();
 }
 
 function mostrarError(mensaje) {
@@ -203,8 +237,24 @@ document.addEventListener("click", (event) => {
     if (modulo === "responsables") {
         mostrarResponsables();
     }
+    if (modulo === "invitados") {
+    mostrarInvitados();
+}
 });
+document.getElementById("back-home-invitados").addEventListener(
+    "click",
+    mostrarInicio
+);
 
+document.getElementById("refresh-invitados").addEventListener(
+    "click",
+    cargarTodosInvitados
+);
+
+document.getElementById("agregar-invitado").addEventListener(
+    "click",
+    agregarCampoInvitado
+);
 document.getElementById("back-home-button").addEventListener(
     "click",
     mostrarInicio
@@ -220,6 +270,7 @@ document.getElementById("close-invitados-button").addEventListener(
     () => {
         invitadosResponsableCard.hidden = true;
     }
+    
 );
 
 // --------------------------------------------------
@@ -461,7 +512,228 @@ async function consultarInvitadosResponsable(responsableId) {
         `;
     }
 }
+function agregarCampoInvitado() {
+    const fila = document.createElement("div");
 
+    fila.className = "invitado-form-row";
+
+    fila.innerHTML = `
+        <div class="form-field">
+            <label>Nombre *</label>
+            <input type="text"
+                   name="nombre"
+                   placeholder="Nombre completo"
+                   minlength="2"
+                   maxlength="150"
+                   required>
+        </div>
+
+        <div class="form-field">
+            <label>Teléfono</label>
+            <input type="tel"
+                   name="telefono"
+                   placeholder="Opcional"
+                   maxlength="30">
+        </div>
+
+        <button type="button"
+                class="table-action eliminar-campo-invitado">
+            Quitar
+        </button>
+    `;
+
+    invitadosFields.appendChild(fila);
+
+    fila.querySelector('input[name="nombre"]').focus();
+}
+invitadosFields.addEventListener("click", (event) => {
+    const boton = event.target.closest(".eliminar-campo-invitado");
+
+    if (!boton) {
+        return;
+    }
+
+    const filas = invitadosFields.querySelectorAll(
+        ".invitado-form-row"
+    );
+
+    if (filas.length <= 1) {
+        mostrarMensaje(
+            invitadosFormMessage,
+            "Debe permanecer al menos un campo de invitado.",
+            "error"
+        );
+        return;
+    }
+
+    boton.closest(".invitado-form-row").remove();
+    limpiarMensaje(invitadosFormMessage);
+});
+async function cargarResponsablesSelect() {
+    invitadosResponsableSelect.innerHTML = `
+        <option value="">Cargando responsables...</option>
+    `;
+
+    try {
+        const datos = await solicitarAPI("/responsables");
+
+        responsablesActuales = datos.responsables || [];
+
+        invitadosResponsableSelect.innerHTML = `
+            <option value="">Selecciona un responsable</option>
+        `;
+
+        responsablesActuales.forEach((responsable) => {
+            const opcion = document.createElement("option");
+
+            opcion.value = responsable.id;
+            opcion.textContent = responsable.nombre;
+
+            invitadosResponsableSelect.appendChild(opcion);
+        });
+
+        if (responsablesActuales.length === 0) {
+            mostrarMensaje(
+                invitadosFormMessage,
+                "Primero debes registrar un responsable.",
+                "error"
+            );
+        }
+
+    } catch (error) {
+        invitadosResponsableSelect.innerHTML = `
+            <option value="">No fue posible cargar responsables</option>
+        `;
+
+        mostrarMensaje(
+            invitadosFormMessage,
+            error.message,
+            "error"
+        );
+    }
+}
+invitadosForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    limpiarMensaje(invitadosFormMessage);
+    invitadosResultados.innerHTML = "";
+
+    const responsableId = Number(
+        invitadosResponsableSelect.value
+    );
+
+    if (!responsableId) {
+        mostrarMensaje(
+            invitadosFormMessage,
+            "Selecciona un responsable.",
+            "error"
+        );
+        return;
+    }
+
+    const filas = [
+        ...invitadosFields.querySelectorAll(".invitado-form-row")
+    ];
+
+    const personas = filas.map((fila) => ({
+        nombre: fila.querySelector('[name="nombre"]').value.trim(),
+        telefono: fila.querySelector('[name="telefono"]').value.trim()
+    }));
+
+    if (personas.some(persona => persona.nombre.length < 2)) {
+        mostrarMensaje(
+            invitadosFormMessage,
+            "Todos los invitados deben tener un nombre de al menos 2 caracteres.",
+            "error"
+        );
+        return;
+    }
+
+    registrarInvitadosButton.disabled = true;
+    registrarInvitadosButton.textContent = "Registrando...";
+
+    let exitosos = 0;
+    const errores = [];
+
+    try {
+        for (const persona of personas) {
+            try {
+                await solicitarAPI("/invitados", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        nombre: persona.nombre,
+                        telefono: persona.telefono || null,
+                        responsable_id: responsableId
+                    })
+                });
+
+                exitosos++;
+
+            } catch (error) {
+                errores.push({
+                    nombre: persona.nombre,
+                    mensaje: error.message
+                });
+            }
+        }
+
+        if (exitosos === personas.length) {
+            invitadosForm.reset();
+
+            invitadosFields.innerHTML = `
+                <div class="invitado-form-row">
+                    <div class="form-field">
+                        <label>Nombre *</label>
+                        <input type="text"
+                               name="nombre"
+                               placeholder="Nombre completo"
+                               minlength="2"
+                               maxlength="150"
+                               required>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Teléfono</label>
+                        <input type="tel"
+                               name="telefono"
+                               placeholder="Opcional"
+                               maxlength="30">
+                    </div>
+                </div>
+            `;
+
+            mostrarMensaje(
+                invitadosFormMessage,
+                `${exitosos} invitado(s) registrado(s) correctamente.`,
+                "success"
+            );
+
+        } else {
+            mostrarMensaje(
+                invitadosFormMessage,
+                `${exitosos} registrado(s), ${errores.length} con error. Revisa los resultados.`,
+                "error"
+            );
+
+            invitadosResultados.innerHTML = errores.map(error => `
+                <p class="error-text">
+                    ${escaparHTML(error.nombre)}:
+                    ${escaparHTML(error.mensaje)}
+                </p>
+            `).join("");
+        }
+
+        await cargarTodosInvitados();
+        await cargarResponsables();
+
+    } finally {
+        registrarInvitadosButton.disabled = false;
+        registrarInvitadosButton.textContent = "Registrar invitados";
+    }
+});
 // --------------------------------------------------
 // Seguridad de presentación
 // --------------------------------------------------
@@ -493,3 +765,69 @@ function claseAsistencia(asistencia) {
 
 // Comprobar si ya existe una sesión al abrir el panel.
 consultarSesion();
+async function cargarTodosInvitados() {
+    invitadosGeneralTable.innerHTML = `
+        <tr>
+            <td colspan="4" class="empty-cell">
+                Cargando invitados...
+            </td>
+        </tr>
+    `;
+
+    try {
+        const datos = await solicitarAPI("/invitados");
+
+        invitadosActuales = datos.invitados || [];
+
+        document.getElementById("invitados-total").textContent =
+            datos.total_invitados;
+
+        document.getElementById("invitados-confirmados").textContent =
+            datos.total_confirmados;
+
+        document.getElementById("invitados-pendientes").textContent =
+            datos.total_pendientes;
+
+        document.getElementById("invitados-declinados").textContent =
+            datos.total_declinados;
+
+        if (invitadosActuales.length === 0) {
+            invitadosGeneralTable.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-cell">
+                        Todavía no hay invitados registrados.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        invitadosGeneralTable.innerHTML = "";
+
+        invitadosActuales.forEach((invitado) => {
+            const fila = document.createElement("tr");
+
+            fila.innerHTML = `
+                <td>${escaparHTML(invitado.nombre)}</td>
+                <td>${escaparHTML(invitado.responsable_nombre)}</td>
+                <td>${escaparHTML(invitado.telefono || "—")}</td>
+                <td>
+                    <span class="attendance-status ${claseAsistencia(invitado.asistencia)}">
+                        ${escaparHTML(invitado.asistencia)}
+                    </span>
+                </td>
+            `;
+
+            invitadosGeneralTable.appendChild(fila);
+        });
+
+    } catch (error) {
+        invitadosGeneralTable.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-cell error-text">
+                    ${escaparHTML(error.message)}
+                </td>
+            </tr>
+        `;
+    }
+}

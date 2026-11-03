@@ -957,3 +957,98 @@ h3 {
         min-width: 650px;
     }
 }
+/* Módulo de invitados */
+
+#invitados-responsable {
+    width: 100%;
+    height: 46px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+}
+
+.invitados-fields {
+    display: grid;
+    gap: 14px;
+}
+
+.invitado-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fdfafa;
+}
+
+.invitados-form-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+#registrar-invitados-button {
+    min-height: 46px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--accent);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#registrar-invitados-button:hover {
+    background: #59232b;
+}
+
+#registrar-invitados-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+#invitados-resultados {
+    margin-top: 12px;
+    font-size: 12px;
+}
+
+#invitados-resultados p {
+    margin: 6px 0;
+}
+
+@media (max-width: 760px) {
+    .invitado-form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .invitado-form-row .eliminar-campo-invitado {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 520px) {
+    .invitado-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .invitado-form-row .eliminar-campo-invitado {
+        grid-column: auto;
+    }
+
+    .invitados-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .invitados-form-actions button {
+        width: 100%;
+    }
+}

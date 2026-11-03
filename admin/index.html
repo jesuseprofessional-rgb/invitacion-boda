@@ -81,12 +81,14 @@
                         <span class="module-status">Abrir módulo</span>
                     </button>
 
-                    <article class="module-card">
-                        <span class="module-number">02</span>
-                        <h3>Invitados</h3>
-                        <p>Registrar personas y asignarlas a un responsable.</p>
-                        <span class="module-status">En desarrollo</span>
-                    </article>
+                    <button class="module-card module-button"
+            type="button"
+            data-module="invitados">
+           <span class="module-number">02</span>
+          <h3>Invitados</h3>
+          <p>Registrar personas, administrar grupos y consultar asistencias.</p>
+           <span class="module-status">Abrir módulo</span>
+            </button>
 
                     <article class="module-card">
                         <span class="module-number">03</span>
@@ -248,6 +250,158 @@
                     </div>
                 </div>
             </section>
+<!-- Módulo de invitados -->
+<section id="invitados-view" hidden>
+
+    <div class="module-toolbar">
+        <button type="button"
+                class="button-secondary"
+                id="back-home-invitados">
+            ← Volver al inicio
+        </button>
+
+        <div>
+            <p class="eyebrow">MÓDULO 02</p>
+            <h2>Invitados</h2>
+            <p class="description">
+                Registro y administración de las personas invitadas.
+            </p>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span>Total de invitados</span>
+            <strong id="invitados-total">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Confirmados</span>
+            <strong id="invitados-confirmados">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Pendientes</span>
+            <strong id="invitados-pendientes">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Declinados</span>
+            <strong id="invitados-declinados">0</strong>
+        </article>
+    </div>
+
+    <!-- Registro -->
+    <div class="content-card">
+        <div class="content-heading">
+            <h3>Registrar invitados</h3>
+            <p>
+                Selecciona un responsable y agrega uno o varios integrantes
+                de su grupo.
+            </p>
+        </div>
+
+        <form id="invitados-form">
+
+            <div class="form-field">
+                <label for="invitados-responsable">
+                    Responsable *
+                </label>
+
+                <select id="invitados-responsable"
+                        name="responsable_id"
+                        required>
+                    <option value="">Selecciona un responsable</option>
+                </select>
+            </div>
+
+            <div class="content-heading" style="margin-top: 25px;">
+                <h3>Personas</h3>
+                <p>Agrega los integrantes que pertenecen a este grupo.</p>
+            </div>
+
+            <div id="invitados-fields" class="invitados-fields">
+                <div class="invitado-form-row">
+                    <div class="form-field">
+                        <label>Nombre *</label>
+                        <input type="text"
+                               name="nombre"
+                               placeholder="Nombre completo"
+                               minlength="2"
+                               maxlength="150"
+                               required>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Teléfono</label>
+                        <input type="tel"
+                               name="telefono"
+                               placeholder="Opcional"
+                               maxlength="30">
+                    </div>
+                </div>
+            </div>
+
+            <div class="invitados-form-actions">
+                <button type="button"
+                        class="button-secondary"
+                        id="agregar-invitado">
+                    + Agregar otro invitado
+                </button>
+
+                <button type="submit"
+                        id="registrar-invitados-button">
+                    Registrar invitados
+                </button>
+            </div>
+
+            <p id="invitados-form-message"
+               class="message"
+               role="status"></p>
+
+            <div id="invitados-resultados" aria-live="polite"></div>
+        </form>
+    </div>
+
+    <!-- Listado -->
+    <div class="content-card">
+        <div class="content-heading list-heading">
+            <div>
+                <h3>Invitados registrados</h3>
+                <p>Consulta y administra el estado de asistencia.</p>
+            </div>
+
+            <button type="button"
+                    class="button-secondary"
+                    id="refresh-invitados">
+                Actualizar
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Responsable</th>
+                        <th>Teléfono</th>
+                        <th>Asistencia</th>
+                    </tr>
+                </thead>
+
+                <tbody id="invitados-general-table">
+                    <tr>
+                        <td colspan="4" class="empty-cell">
+                            Cargando invitados...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
 
             <p id="dashboard-message" class="message" role="status"></p>
         </section>

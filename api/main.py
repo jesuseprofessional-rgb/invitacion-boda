@@ -574,6 +574,71 @@ def crear_invitado(
     finally:
         if conexion:
             conexion.close()
+@app.get("/invitados")
+def consultar_todos_invitados(
+    _: bool = Depends(verificar_admin),
+):
+    conexion = None
+
+    try:
+        conexion = obtener_conexion()
+
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    i.id,
+                    i.nombre,
+                    i.telefono,
+                    i.mesa,
+                    i.responsable_id,
+                    r.nombre AS responsable_nombre,
+                    i.asistencia,
+                    i.creado_en
+                FROM invitados AS i
+                INNER JOIN responsables AS r
+                    ON r.id = i.responsable_id
+                WHERE i.activo = 1
+                ORDER BY r.nombre ASC, i.nombre ASC
+                """
+            )
+
+            invitados = cursor.fetchall()
+
+        total = len(invitados)
+
+        confirmados = sum(
+            1 for invitado in invitados
+            if invitado["asistencia"] == "CONFIRMADO"
+        )
+
+        declinados = sum(
+            1 for invitado in invitados
+            if invitado["asistencia"] == "DECLINADO"
+        )
+
+        pendientes = sum(
+            1 for invitado in invitados
+            if invitado["asistencia"] == "PENDIENTE"
+        )
+
+        return {
+            "total_invitados": total,
+            "total_confirmados": confirmados,
+            "total_declinados": declinados,
+            "total_pendientes": pendientes,
+            "invitados": invitados,
+        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible consultar los invitados",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()
 
 @app.get("/responsables/{responsable_id}/invitados")
 def consultar_invitados(
