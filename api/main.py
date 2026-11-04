@@ -1,15 +1,24 @@
-import secrets
+import hashlib
 import os
-from fastapi import Depends, Header
+import secrets
+
+from datetime import datetime, timedelta, timezone
+
 import pymysql
-from fastapi import FastAPI, HTTPException
+
+from cryptography.fernet import Fernet, InvalidToken
+
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    Request,
+    Response,
+)
+
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 from pymysql.cursors import DictCursor
-from fastapi.security import APIKeyHeader
-import hashlib
-from datetime import datetime, timedelta, timezone
-from fastapi import Request, Response
-
 
 app = FastAPI(
     title="API de Invitaciones",
@@ -17,10 +26,52 @@ app = FastAPI(
     version="1.0.0",
     root_path="/api",
 )
+
 admin_key_header = APIKeyHeader(
     name="X-Admin-Key",
     auto_error=False,
 )
+def obtener_conexion():
+    return pymysql.connect(
+        host=os.environ["DB_HOST"],
+        port=int(os.environ.get("DB_PORT", "3306")),
+        user=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        database=os.environ["DB_NAME"],
+        charset="utf8mb4",
+        cursorclass=DictCursor,
+        connect_timeout=5,
+    )
+
+
+def obtener_cifrador_pases():
+    clave = os.environ.get("PASES_ENCRYPTION_KEY")
+
+    if not clave:
+        raise RuntimeError(
+            "No está configurada la clave de cifrado de los pases"
+        )
+
+    try:
+        return Fernet(clave.encode("utf-8"))
+
+    except (ValueError, TypeError):
+        raise RuntimeError(
+            "La clave de cifrado de los pases no es válida"
+        )
+
+
+def cifrar_token_pase(token: str) -> bytes:
+    return obtener_cifrador_pases().encrypt(
+        token.encode("utf-8")
+    )
+
+
+def descifrar_token_pase(token_cifrado: bytes) -> str:
+    return obtener_cifrador_pases().decrypt(
+        token_cifrado
+    ).decode("utf-8") 
+
 
 class ResponsableCrear(BaseModel):
     nombre: str = Field(min_length=2, max_length=150)
@@ -45,17 +96,6 @@ class AsistenciaInvitacion(BaseModel):
 class AdminLogin(BaseModel):
     password: str = Field(min_length=1, max_length=256)
 
-def obtener_conexion():
-    return pymysql.connect(
-        host=os.environ["DB_HOST"],
-        port=int(os.environ.get("DB_PORT", "3306")),
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASSWORD"],
-        database=os.environ["DB_NAME"],
-        charset="utf8mb4",
-        cursorclass=DictCursor,
-        connect_timeout=5,
-    )
 def validar_origen_admin(request: Request):
     origen_configurado = os.environ.get("ADMIN_ALLOWED_ORIGIN")
 
@@ -1005,6 +1045,7 @@ def crear_token(
 
 @app.get("/invitacion/{token}")
 def consultar_invitacion(token: str):
+
     if not token or len(token) > 200:
         raise HTTPException(
             status_code=404,
@@ -1021,6 +1062,8 @@ def consultar_invitacion(token: str):
         conexion = obtener_conexion()
 
         with conexion.cursor() as cursor:
+
+            # Validar el token de invitación.
             cursor.execute(
                 """
                 SELECT
@@ -1053,14 +1096,22 @@ def consultar_invitacion(token: str):
                     detail="Invitación no válida o revocada",
                 )
 
+            # Consultar invitados de una invitación grupal.
             if registro_token["tipo"] == "RESPONSABLE":
+
                 cursor.execute(
                     """
                     SELECT
                         i.id,
                         i.nombre,
-                        i.asistencia
+                        i.asistencia,
+                        p.token_cifrado
                     FROM invitados AS i
+                    LEFT JOIN pases_acceso AS p
+                        ON p.invitado_id = i.id
+                       AND p.activo = 1
+                       AND p.revocado_en IS NULL
+                       AND i.asistencia = 'CONFIRMADO'
                     WHERE i.responsable_id = %s
                       AND i.activo = 1
                     ORDER BY i.nombre
@@ -1068,16 +1119,24 @@ def consultar_invitacion(token: str):
                     (registro_token["responsable_id"],),
                 )
 
+            # Consultar invitados de una invitación individual.
             else:
+
                 cursor.execute(
                     """
                     SELECT
                         i.id,
                         i.nombre,
-                        i.asistencia
+                        i.asistencia,
+                        p.token_cifrado
                     FROM invitacion_invitados AS ii
                     INNER JOIN invitados AS i
                         ON i.id = ii.invitado_id
+                    LEFT JOIN pases_acceso AS p
+                        ON p.invitado_id = i.id
+                       AND p.activo = 1
+                       AND p.revocado_en IS NULL
+                       AND i.asistencia = 'CONFIRMADO'
                     WHERE ii.token_id = %s
                       AND i.activo = 1
                     ORDER BY i.nombre
@@ -1092,6 +1151,28 @@ def consultar_invitacion(token: str):
                 status_code=404,
                 detail="La invitación no tiene invitados activos",
             )
+
+        # Recuperar el token de cada pase confirmado.
+        for invitado in invitados:
+
+            token_cifrado = invitado.pop(
+                "token_cifrado",
+                None,
+            )
+
+            invitado["pase_token"] = None
+
+            if token_cifrado:
+                try:
+                    invitado["pase_token"] = (
+                        descifrar_token_pase(token_cifrado)
+                    )
+
+                except InvalidToken:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="No fue posible recuperar el pase digital",
+                    )
 
         return {
             "tipo": registro_token["tipo"],
@@ -1111,8 +1192,6 @@ def consultar_invitacion(token: str):
     finally:
         if conexion:
             conexion.close()
-
-
 @app.patch("/invitacion/{token}/asistencia")
 def responder_invitacion(
     token: str,
@@ -1426,6 +1505,7 @@ def consultar_tokens(
 
 
 @app.post("/pases", status_code=201)
+@app.post("/pases", status_code=201)
 def generar_pases(
     _: bool = Depends(verificar_admin),
 ):
@@ -1433,12 +1513,12 @@ def generar_pases(
 
     try:
         conexion = obtener_conexion()
-
         pases_generados = []
 
         with conexion.cursor() as cursor:
-            # Bloquear los invitados confirmados que todavía
-            # no tienen un pase de acceso.
+
+            # Bloquear los invitados confirmados.
+            # Esto serializa la generación de sus pases.
             cursor.execute(
                 """
                 SELECT
@@ -1450,11 +1530,8 @@ def generar_pases(
                 FROM invitados AS i
                 INNER JOIN responsables AS r
                     ON r.id = i.responsable_id
-                LEFT JOIN pases_acceso AS p
-                    ON p.invitado_id = i.id
                 WHERE i.activo = 1
                   AND i.asistencia = 'CONFIRMADO'
-                  AND p.id IS NULL
                 ORDER BY i.id
                 FOR UPDATE
                 """
@@ -1462,27 +1539,48 @@ def generar_pases(
 
             invitados = cursor.fetchall()
 
-            # Crear un pase individual para cada invitado.
             for invitado in invitados:
 
-                # Código secreto aleatorio.
+                # Comprobar si ya tiene un pase activo.
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM pases_acceso
+                    WHERE invitado_id = %s
+                      AND activo = 1
+                      AND revocado_en IS NULL
+                    LIMIT 1
+                    """,
+                    (invitado["invitado_id"],),
+                )
+
+                if cursor.fetchone():
+                    continue
+
+                # Generar credencial individual.
                 token = secrets.token_urlsafe(32)
 
-                # Almacenar únicamente el hash SHA-256.
                 token_hash = hashlib.sha256(
                     token.encode("utf-8")
                 ).digest()
+
+                token_cifrado = cifrar_token_pase(token)
 
                 cursor.execute(
                     """
                     INSERT INTO pases_acceso (
                         invitado_id,
                         token_hash,
+                        token_cifrado,
                         activo
                     )
-                    VALUES (%s, %s, 1)
+                    VALUES (%s, %s, %s, 1)
                     """,
-                    (invitado["invitado_id"], token_hash),
+                    (
+                        invitado["invitado_id"],
+                        token_hash,
+                        token_cifrado,
+                    ),
                 )
 
                 pases_generados.append({
@@ -1513,7 +1611,7 @@ def generar_pases(
 
         raise HTTPException(
             status_code=409,
-            detail="No fue posible generar los pases por un conflicto de duplicidad. Intenta nuevamente.",
+            detail="Conflicto al generar los pases de acceso",
         )
 
     except Exception:
@@ -1528,8 +1626,6 @@ def generar_pases(
     finally:
         if conexion:
             conexion.close()
-
-
 @app.get("/pases")
 def consultar_pases(
     _: bool = Depends(verificar_admin),
@@ -1574,6 +1670,69 @@ def consultar_pases(
         raise HTTPException(
             status_code=500,
             detail="No fue posible consultar los pases de acceso",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()
+@app.patch("/pases/{pase_id}/revocar")
+def revocar_pase(
+    pase_id: int,
+    _: bool = Depends(verificar_admin)
+):
+    conexion = None
+
+    try:
+        conexion = obtener_conexion()
+
+        with conexion.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, activo, revocado_en
+                FROM pases_acceso
+                WHERE id = %s
+                FOR UPDATE
+            """, (pase_id,))
+
+            pase = cursor.fetchone()
+
+            if not pase:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Pase no encontrado"
+                )
+
+            if not pase["activo"] or pase["revocado_en"] is not None:
+                raise HTTPException(
+                    status_code=409,
+                    detail="El pase ya está revocado"
+                )
+
+            cursor.execute("""
+                UPDATE pases_acceso
+                SET activo = 0,
+                    revocado_en = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (pase_id,))
+
+        conexion.commit()
+
+        return {
+            "mensaje": "Pase revocado correctamente",
+            "pase_id": pase_id
+        }
+
+    except HTTPException:
+        if conexion:
+            conexion.rollback()
+        raise
+
+    except Exception:
+        if conexion:
+            conexion.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Error al revocar el pase"
         )
 
     finally:
