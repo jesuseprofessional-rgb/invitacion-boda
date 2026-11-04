@@ -632,14 +632,18 @@
         </p>
 
         <div id="pases-generados" hidden>
-            <h3>Pases recién generados</h3>
-            <p class="description">
-                Los códigos originales están disponibles únicamente
-                durante esta sesión. No cierres ni recargues la página
-                antes de preparar sus documentos.
-            </p>
-            <p id="pases-generados-resumen"></p>
-        </div>
+    <h3>Pases recién generados</h3>
+
+    <p class="description">
+        Descarga y guarda los códigos QR antes de salir
+        del panel. Por seguridad, no podremos recuperar
+        los códigos originales después.
+    </p>
+
+    <p id="pases-generados-resumen"></p>
+
+    <div id="pases-generados-lista" class="pases-qr-grid"></div>
+</div>
 
     </div>
 
@@ -849,6 +853,7 @@
         </section>
     </main>
 
-    <script src="/js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="/js/admin.js"></script>
 </body>
 </html>

@@ -1716,6 +1716,70 @@ confirmacionesTableBody.addEventListener("click", async (event) => {
 // Invitaciones: consultar pases
 // --------------------------------------------------
 
+async function renderizarPasesGenerados(pases) {
+    const lista = document.getElementById(
+        "pases-generados-lista"
+    );
+
+    lista.innerHTML = "";
+
+    for (const pase of pases) {
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "pase-qr-card";
+
+        const titulo = document.createElement("h4");
+        titulo.textContent = pase.nombre;
+
+        const mesa = document.createElement("p");
+        mesa.textContent = `Mesa: ${pase.mesa || "Sin asignar"}`;
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "pase-qr-code";
+
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.textContent = "Descargar QR";
+
+        tarjeta.appendChild(titulo);
+        tarjeta.appendChild(mesa);
+        tarjeta.appendChild(canvas);
+        tarjeta.appendChild(boton);
+
+        lista.appendChild(tarjeta);
+
+        try {
+            const urlAcceso =
+                `${window.location.origin}/acceso/?token=${encodeURIComponent(pase.token)}`;
+
+            await QRCode.toCanvas(canvas, urlAcceso, {
+                width: 240,
+                margin: 2,
+                errorCorrectionLevel: "M"
+            });
+
+            boton.addEventListener("click", () => {
+                const enlace = document.createElement("a");
+
+                const nombreArchivo = pase.nombre
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]+/gi, "-")
+                    .replace(/^-|-$/g, "")
+                    .toLowerCase();
+
+                enlace.download = `pase-${nombreArchivo}.png`;
+                enlace.href = canvas.toDataURL("image/png");
+                enlace.click();
+            });
+
+        } catch (error) {
+            console.error("Error al generar QR:", error);
+            boton.disabled = true;
+            boton.textContent = "Error al generar QR";
+        }
+    }
+}
+
 async function cargarPases() {
     pasesTableBody.innerHTML = `
         <tr>
@@ -1850,16 +1914,23 @@ generarPasesButton.addEventListener("click", async () => {
             method: "POST"
         });
 
-        pasesRecienGenerados = resultado.pases || [];
+       pasesRecienGenerados = resultado.pases || [];
 
-        pasesGenerados.hidden = pasesRecienGenerados.length === 0;
+pasesGenerados.hidden = pasesRecienGenerados.length === 0;
 
-        if (pasesRecienGenerados.length > 0) {
-            pasesGeneradosResumen.textContent =
-                `${pasesRecienGenerados.length} pase(s) generado(s). Los códigos están disponibles en memoria para preparar sus QR y documentos.`;
-        } else {
-            pasesGeneradosResumen.textContent = "";
-        }
+if (pasesRecienGenerados.length > 0) {
+    pasesGeneradosResumen.textContent =
+        `${pasesRecienGenerados.length} pase(s) generado(s). Descarga sus códigos QR.`;
+
+    await renderizarPasesGenerados(pasesRecienGenerados);
+
+} else {
+    pasesGeneradosResumen.textContent = "";
+
+    document.getElementById(
+        "pases-generados-lista"
+    ).innerHTML = "";
+}
 
         mostrarMensaje(
             invitacionesMessage,
