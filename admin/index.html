@@ -90,12 +90,14 @@
            <span class="module-status">Abrir módulo</span>
             </button>
 
-                    <article class="module-card">
-                        <span class="module-number">03</span>
-                        <h3>Invitaciones</h3>
-                        <p>Seleccionar invitados y generar enlaces.</p>
-                        <span class="module-status">En desarrollo</span>
-                    </article>
+                   <button class="module-card module-button"
+        type="button"
+        data-module="invitaciones">
+    <span class="module-number">03</span>
+    <h3>Invitaciones</h3>
+    <p>Generar pases individuales y administrar códigos QR.</p>
+    <span class="module-status">Abrir módulo</span>
+</button>
 
                     <button class="module-card module-button"
         type="button"
@@ -566,6 +568,128 @@
     </div>
 
 </section>
+
+<!-- Módulo de invitaciones -->
+<section id="invitaciones-view" hidden>
+
+    <div class="module-toolbar">
+        <button type="button"
+                class="button-secondary"
+                id="back-home-invitaciones">
+            ← Volver al inicio
+        </button>
+
+        <div>
+            <p class="eyebrow">MÓDULO 03</p>
+            <h2>Invitaciones</h2>
+            <p class="description">
+                Generación y administración de pases individuales de acceso.
+            </p>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+
+        <article class="stat-card">
+            <span>Pases generados</span>
+            <strong id="pases-total">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Pases activos</span>
+            <strong id="pases-activos">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span>Pases revocados</span>
+            <strong id="pases-revocados">0</strong>
+        </article>
+
+    </div>
+
+    <!-- Generación -->
+    <div class="content-card">
+
+        <div class="content-heading">
+            <h3>Generar pases de acceso</h3>
+            <p>
+                Se generará un pase individual para cada invitado activo
+                que haya confirmado su asistencia y todavía no tenga uno.
+            </p>
+        </div>
+
+        <button type="button"
+                class="button-primary"
+                id="generar-pases-button">
+            Generar pases de confirmados
+        </button>
+
+        <p id="invitaciones-message"
+           class="message"
+           role="status"
+           aria-live="polite">
+        </p>
+
+        <div id="pases-generados" hidden>
+            <h3>Pases recién generados</h3>
+            <p class="description">
+                Los códigos originales están disponibles únicamente
+                durante esta sesión. No cierres ni recargues la página
+                antes de preparar sus documentos.
+            </p>
+            <p id="pases-generados-resumen"></p>
+        </div>
+
+    </div>
+
+    <!-- Listado -->
+    <div class="content-card">
+
+        <div class="content-heading list-heading">
+            <div>
+                <h3>Listado de pases</h3>
+                <p>
+                    Consulta los pases emitidos y el estado de sus invitados.
+                </p>
+            </div>
+
+            <button type="button"
+                    class="button-secondary"
+                    id="refresh-pases">
+                Actualizar
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+
+                <thead>
+                    <tr>
+                        <th>Invitado</th>
+                        <th>Responsable</th>
+                        <th>Mesa</th>
+                        <th>Asistencia</th>
+                        <th>Pase</th>
+                        <th>Generado</th>
+                    </tr>
+                </thead>
+
+                <tbody id="pases-table-body">
+                    <tr>
+                        <td colspan="6" class="empty-cell">
+                            Abre el módulo para consultar los pases.
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</section>
+
 <!-- Módulo de confirmaciones -->
 <section id="confirmaciones-view" hidden>
 

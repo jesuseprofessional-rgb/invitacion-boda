@@ -1424,3 +1424,158 @@ def consultar_tokens(
         if conexion:
             conexion.close()
 
+
+@app.post("/pases", status_code=201)
+def generar_pases(
+    _: bool = Depends(verificar_admin),
+):
+    conexion = None
+
+    try:
+        conexion = obtener_conexion()
+
+        pases_generados = []
+
+        with conexion.cursor() as cursor:
+            # Bloquear los invitados confirmados que todavía
+            # no tienen un pase de acceso.
+            cursor.execute(
+                """
+                SELECT
+                    i.id AS invitado_id,
+                    i.nombre,
+                    i.mesa,
+                    i.asistencia,
+                    r.nombre AS responsable_nombre
+                FROM invitados AS i
+                INNER JOIN responsables AS r
+                    ON r.id = i.responsable_id
+                LEFT JOIN pases_acceso AS p
+                    ON p.invitado_id = i.id
+                WHERE i.activo = 1
+                  AND i.asistencia = 'CONFIRMADO'
+                  AND p.id IS NULL
+                ORDER BY i.id
+                FOR UPDATE
+                """
+            )
+
+            invitados = cursor.fetchall()
+
+            # Crear un pase individual para cada invitado.
+            for invitado in invitados:
+
+                # Código secreto aleatorio.
+                token = secrets.token_urlsafe(32)
+
+                # Almacenar únicamente el hash SHA-256.
+                token_hash = hashlib.sha256(
+                    token.encode("utf-8")
+                ).digest()
+
+                cursor.execute(
+                    """
+                    INSERT INTO pases_acceso (
+                        invitado_id,
+                        token_hash,
+                        activo
+                    )
+                    VALUES (%s, %s, 1)
+                    """,
+                    (invitado["invitado_id"], token_hash),
+                )
+
+                pases_generados.append({
+                    "pase_id": cursor.lastrowid,
+                    "invitado_id": invitado["invitado_id"],
+                    "nombre": invitado["nombre"],
+                    "mesa": invitado["mesa"],
+                    "responsable_nombre": invitado["responsable_nombre"],
+                    "token": token,
+                })
+
+        conexion.commit()
+
+        return {
+            "mensaje": "Pases generados correctamente",
+            "total_generados": len(pases_generados),
+            "pases": pases_generados,
+        }
+
+    except HTTPException:
+        if conexion:
+            conexion.rollback()
+        raise
+
+    except pymysql.err.IntegrityError:
+        if conexion:
+            conexion.rollback()
+
+        raise HTTPException(
+            status_code=409,
+            detail="No fue posible generar los pases por un conflicto de duplicidad. Intenta nuevamente.",
+        )
+
+    except Exception:
+        if conexion:
+            conexion.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible generar los pases de acceso",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()
+
+
+@app.get("/pases")
+def consultar_pases(
+    _: bool = Depends(verificar_admin),
+):
+    conexion = None
+
+    try:
+        conexion = obtener_conexion()
+
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    p.id AS pase_id,
+                    p.invitado_id,
+                    i.nombre,
+                    i.mesa,
+                    i.asistencia,
+                    i.activo AS invitado_activo,
+                    r.nombre AS responsable_nombre,
+                    p.activo AS pase_activo,
+                    p.creado_en,
+                    p.revocado_en,
+                    p.registrado_en
+                FROM pases_acceso AS p
+                INNER JOIN invitados AS i
+                    ON i.id = p.invitado_id
+                INNER JOIN responsables AS r
+                    ON r.id = i.responsable_id
+                ORDER BY p.creado_en DESC
+                """
+            )
+
+            pases = cursor.fetchall()
+
+        return {
+            "total_pases": len(pases),
+            "pases": pases,
+        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible consultar los pases de acceso",
+        )
+
+    finally:
+        if conexion:
+            conexion.close()

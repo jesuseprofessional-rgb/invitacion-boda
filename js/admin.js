@@ -111,6 +111,39 @@ const enlaceGeneradoUrl = document.getElementById("enlace-generado-url");
 const enlaceGeneradoDestinatario = document.getElementById(
     "enlace-generado-destinatario"
 );
+// --------------------------------------------------
+// Referencias del módulo Invitaciones
+// --------------------------------------------------
+
+const invitacionesView = document.getElementById(
+    "invitaciones-view"
+);
+
+const generarPasesButton = document.getElementById(
+    "generar-pases-button"
+);
+
+const invitacionesMessage = document.getElementById(
+    "invitaciones-message"
+);
+
+const pasesTableBody = document.getElementById(
+    "pases-table-body"
+);
+
+const pasesGenerados = document.getElementById(
+    "pases-generados"
+);
+
+const pasesGeneradosResumen = document.getElementById(
+    "pases-generados-resumen"
+);
+
+let pasesActuales = [];
+
+// Los tokens originales solo viven en memoria.
+// No se guardan en localStorage ni sessionStorage.
+let pasesRecienGenerados = [];
 
 let enlacesActuales = [];
 
@@ -138,6 +171,7 @@ function mostrarInicio() {
     invitadosResponsableCard.hidden = true;
     enlacesView.hidden = true;
     confirmacionesView.hidden = true;
+    invitacionesView.hidden = true;
 }
 
 function mostrarResponsables() {
@@ -146,6 +180,7 @@ function mostrarResponsables() {
     invitadosView.hidden = true;
     enlacesView.hidden = true;
     confirmacionesView.hidden = true;
+    invitacionesView.hidden = true;
 
     cargarResponsables();
 }
@@ -156,6 +191,7 @@ function mostrarInvitados() {
     invitadosView.hidden = false;
     enlacesView.hidden = true;
     confirmacionesView.hidden = true;
+    invitacionesView.hidden = true;
 
     cargarResponsablesSelect();
     cargarTodosInvitados();
@@ -167,6 +203,7 @@ function mostrarEnlaces() {
     invitadosView.hidden = true;
     enlacesView.hidden = false;
     confirmacionesView.hidden = true;
+    invitacionesView.hidden = true;
 
     cargarOpcionesEnlaces();
     cargarEnlaces();
@@ -177,8 +214,19 @@ function mostrarConfirmaciones() {
     invitadosView.hidden = true;
     enlacesView.hidden = true;
     confirmacionesView.hidden = false;
+    invitacionesView.hidden = true;
 
     cargarConfirmaciones();
+}
+function mostrarInvitaciones() {
+    homeView.hidden = true;
+    responsablesView.hidden = true;
+    invitadosView.hidden = true;
+    enlacesView.hidden = true;
+    confirmacionesView.hidden = true;
+    invitacionesView.hidden = false;
+
+    cargarPases();
 }
 
 function mostrarError(mensaje) {
@@ -333,8 +381,16 @@ document.addEventListener("click", (event) => {
     }
     if (modulo === "confirmaciones") {
     mostrarConfirmaciones();
+
+    if (modulo === "invitaciones") {
+    mostrarInvitaciones();
+}
 }
 });
+document.getElementById("back-home-invitaciones").addEventListener(
+    "click",
+    mostrarInicio
+);
 document.getElementById("back-home-invitados").addEventListener(
     "click",
     mostrarInicio
@@ -1646,3 +1702,187 @@ confirmacionesTableBody.addEventListener("click", async (event) => {
         boton.textContent = "Guardar";
     }
 });
+
+// --------------------------------------------------
+// Invitaciones: consultar pases
+// --------------------------------------------------
+
+async function cargarPases() {
+    pasesTableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="empty-cell">
+                Consultando pases...
+            </td>
+        </tr>
+    `;
+
+    try {
+        const datos = await solicitarAPI("/pases");
+
+        pasesActuales = datos.pases || [];
+
+        const activos = pasesActuales.filter(
+            pase => Number(pase.pase_activo) === 1
+        );
+
+        const revocados = pasesActuales.filter(
+            pase => Number(pase.pase_activo) === 0
+        );
+
+        document.getElementById("pases-total").textContent =
+            pasesActuales.length;
+
+        document.getElementById("pases-activos").textContent =
+            activos.length;
+
+        document.getElementById("pases-revocados").textContent =
+            revocados.length;
+
+        if (pasesActuales.length === 0) {
+            pasesTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-cell">
+                        Todavía no se han generado pases.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        pasesTableBody.innerHTML = "";
+
+        pasesActuales.forEach((pase) => {
+
+            const paseActivo =
+                Number(pase.pase_activo) === 1;
+
+            const invitadoActivo =
+                Number(pase.invitado_activo) === 1;
+
+            const fecha = pase.creado_en
+                ? new Date(pase.creado_en).toLocaleString("es-MX", {
+                    dateStyle: "short",
+                    timeStyle: "short"
+                })
+                : "—";
+
+            const fila = document.createElement("tr");
+
+            fila.innerHTML = `
+                <td>${escaparHTML(pase.nombre)}</td>
+
+                <td>${escaparHTML(
+                    pase.responsable_nombre || "—"
+                )}</td>
+
+                <td>${escaparHTML(pase.mesa || "Sin asignar")}</td>
+
+                <td>
+                    <span class="attendance-status ${
+                        claseAsistencia(pase.asistencia)
+                    }">
+                        ${escaparHTML(pase.asistencia)}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="attendance-status ${
+                        paseActivo && invitadoActivo
+                            ? "confirmed"
+                            : "declined"
+                    }">
+                        ${
+                            paseActivo && invitadoActivo
+                                ? "Activo"
+                                : "No disponible"
+                        }
+                    </span>
+                </td>
+
+                <td>${escaparHTML(fecha)}</td>
+            `;
+
+            pasesTableBody.appendChild(fila);
+        });
+
+    } catch (error) {
+        pasesTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-cell error-text">
+                    ${escaparHTML(error.message)}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+// --------------------------------------------------
+// Invitaciones: generar pases
+// --------------------------------------------------
+
+generarPasesButton.addEventListener("click", async () => {
+
+    const confirmar = window.confirm(
+        "Se generarán pases para todos los invitados activos que hayan confirmado su asistencia y todavía no tengan uno. ¿Continuar?"
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    generarPasesButton.disabled = true;
+    generarPasesButton.textContent = "Generando pases...";
+
+    limpiarMensaje(invitacionesMessage);
+
+    try {
+        const resultado = await solicitarAPI("/pases", {
+            method: "POST"
+        });
+
+        pasesRecienGenerados = resultado.pases || [];
+
+        pasesGenerados.hidden = pasesRecienGenerados.length === 0;
+
+        if (pasesRecienGenerados.length > 0) {
+            pasesGeneradosResumen.textContent =
+                `${pasesRecienGenerados.length} pase(s) generado(s). Los códigos están disponibles en memoria para preparar sus QR y documentos.`;
+        } else {
+            pasesGeneradosResumen.textContent = "";
+        }
+
+        mostrarMensaje(
+            invitacionesMessage,
+            resultado.total_generados > 0
+                ? `Se generaron ${resultado.total_generados} pase(s) correctamente.`
+                : "No hay invitados confirmados pendientes de generar su pase.",
+            "success"
+        );
+
+        await cargarPases();
+
+    } catch (error) {
+
+        mostrarMensaje(
+            invitacionesMessage,
+            error.message,
+            "error"
+        );
+
+    } finally {
+        generarPasesButton.disabled = false;
+        generarPasesButton.textContent =
+            "Generar pases de confirmados";
+    }
+});
+
+
+// --------------------------------------------------
+// Invitaciones: actualizar listado
+// --------------------------------------------------
+
+document.getElementById("refresh-pases").addEventListener(
+    "click",
+    cargarPases
+);
