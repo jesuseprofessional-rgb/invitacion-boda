@@ -1102,10 +1102,11 @@ def consultar_invitacion(token: str):
                 cursor.execute(
                     """
                     SELECT
-                        i.id,
-                        i.nombre,
-                        i.asistencia,
-                        p.token_cifrado
+    i.id,
+    i.nombre,
+    i.asistencia,
+    p.id AS pase_id,
+    p.token_cifrado
                     FROM invitados AS i
                     LEFT JOIN pases_acceso AS p
                         ON p.invitado_id = i.id
@@ -1125,10 +1126,11 @@ def consultar_invitacion(token: str):
                 cursor.execute(
                     """
                     SELECT
-                        i.id,
-                        i.nombre,
-                        i.asistencia,
-                        p.token_cifrado
+    i.id,
+    i.nombre,
+    i.asistencia,
+    p.id AS pase_id,
+    p.token_cifrado
                     FROM invitacion_invitados AS ii
                     INNER JOIN invitados AS i
                         ON i.id = ii.invitado_id
@@ -1192,6 +1194,8 @@ def consultar_invitacion(token: str):
     finally:
         if conexion:
             conexion.close()
+
+
 @app.patch("/invitacion/{token}/asistencia")
 def responder_invitacion(
     token: str,
@@ -1211,9 +1215,10 @@ def responder_invitacion(
 
     try:
         conexion = obtener_conexion()
+        pase_respuesta = None
 
         with conexion.cursor() as cursor:
-            # Bloquear el token mientras se procesa la respuesta.
+            # Validar y bloquear el token de invitación.
             cursor.execute(
                 """
                 SELECT
@@ -1247,10 +1252,11 @@ def responder_invitacion(
                     detail="Invitación no válida o invitado no autorizado",
                 )
 
+            # Validar y bloquear al invitado.
             if registro_token["tipo"] == "RESPONSABLE":
                 cursor.execute(
                     """
-                    SELECT id, nombre
+                    SELECT id, nombre, mesa
                     FROM invitados
                     WHERE id = %s
                       AND responsable_id = %s
@@ -1266,7 +1272,7 @@ def responder_invitacion(
             else:
                 cursor.execute(
                     """
-                    SELECT i.id, i.nombre
+                    SELECT i.id, i.nombre, i.mesa
                     FROM invitacion_invitados AS ii
                     INNER JOIN invitados AS i
                         ON i.id = ii.invitado_id
@@ -1289,6 +1295,7 @@ def responder_invitacion(
                     detail="Invitación no válida o invitado no autorizado",
                 )
 
+            # Guardar la respuesta de asistencia.
             cursor.execute(
                 """
                 UPDATE invitados
@@ -1301,9 +1308,143 @@ def responder_invitacion(
                 ),
             )
 
+            # Si declina, revocar cualquier pase activo.
+            if datos.asistencia == "DECLINADO":
+
+                cursor.execute(
+                    """
+                    UPDATE pases_acceso
+                    SET
+                        activo = 0,
+                        revocado_en = CURRENT_TIMESTAMP
+                    WHERE invitado_id = %s
+                      AND activo = 1
+                      AND revocado_en IS NULL
+                    """,
+                    (datos.invitado_id,),
+                )
+
+            # Si confirma, recuperar o generar su pase individual.
+            elif datos.asistencia == "CONFIRMADO":
+
+                cursor.execute(
+                    """
+                    SELECT
+                        id,
+                        token_cifrado
+                    FROM pases_acceso
+                    WHERE invitado_id = %s
+                      AND activo = 1
+                      AND revocado_en IS NULL
+                    ORDER BY id DESC
+                    FOR UPDATE
+                    """,
+                    (datos.invitado_id,),
+                )
+
+                pases_activos = cursor.fetchall()
+
+                # Buscar un pase que permita recuperar su token.
+                pase_existente = next(
+                    (
+                        pase
+                        for pase in pases_activos
+                        if pase["token_cifrado"]
+                    ),
+                    None,
+                )
+
+                if pase_existente:
+
+                    # Recuperar el mismo token para no invalidar
+                    # un QR que el invitado ya haya descargado.
+                    try:
+                        token_pase = descifrar_token_pase(
+                            pase_existente["token_cifrado"]
+                        )
+
+                    except InvalidToken:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="No fue posible recuperar el pase digital",
+                        )
+
+                    pase_id = pase_existente["id"]
+
+                    # Revocar cualquier pase activo duplicado.
+                    for pase in pases_activos:
+                        if pase["id"] != pase_id:
+                            cursor.execute(
+                                """
+                                UPDATE pases_acceso
+                                SET
+                                    activo = 0,
+                                    revocado_en = CURRENT_TIMESTAMP
+                                WHERE id = %s
+                                """,
+                                (pase["id"],),
+                            )
+
+                else:
+
+                    # No existe un pase recuperable.
+                    # Revocar registros anteriores sin token cifrado.
+                    for pase in pases_activos:
+                        cursor.execute(
+                            """
+                            UPDATE pases_acceso
+                            SET
+                                activo = 0,
+                                revocado_en = CURRENT_TIMESTAMP
+                            WHERE id = %s
+                            """,
+                            (pase["id"],),
+                        )
+
+                    # Crear un nuevo token individual.
+                    token_pase = secrets.token_urlsafe(32)
+
+                    hash_pase = hashlib.sha256(
+                        token_pase.encode("utf-8")
+                    ).digest()
+
+                    token_cifrado = cifrar_token_pase(
+                        token_pase
+                    )
+
+                    cursor.execute(
+                        """
+                        INSERT INTO pases_acceso (
+                            invitado_id,
+                            token_hash,
+                            token_cifrado,
+                            activo
+                        )
+                        VALUES (%s, %s, %s, 1)
+                        """,
+                        (
+                            datos.invitado_id,
+                            hash_pase,
+                            token_cifrado,
+                        ),
+                    )
+
+                    pase_id = cursor.lastrowid
+
+                pase_respuesta = {
+                    "pase_id": pase_id,
+                    "invitado_id": invitado["id"],
+                    "nombre": invitado["nombre"],
+                    "pase_token": token_pase,
+                }
+
+            # Obtener el estado actualizado del invitado.
             cursor.execute(
                 """
-                SELECT id, nombre, asistencia
+                SELECT
+                    id,
+                    nombre,
+                    asistencia
                 FROM invitados
                 WHERE id = %s
                 """,
@@ -1312,17 +1453,28 @@ def responder_invitacion(
 
             resultado = cursor.fetchone()
 
+        # Confirmar conjuntamente asistencia y gestión del pase.
         conexion.commit()
 
         return {
             "mensaje": "Respuesta de asistencia registrada correctamente",
             "invitado": resultado,
+            "pase": pase_respuesta,
         }
 
     except HTTPException:
         if conexion:
             conexion.rollback()
         raise
+
+    except pymysql.err.IntegrityError:
+        if conexion:
+            conexion.rollback()
+
+        raise HTTPException(
+            status_code=409,
+            detail="Conflicto al generar el pase de acceso",
+        )
 
     except Exception:
         if conexion:
@@ -1336,6 +1488,7 @@ def responder_invitacion(
     finally:
         if conexion:
             conexion.close()
+
 
 @app.patch("/tokens/{token_id}/revocar")
 def revocar_token(
@@ -1504,7 +1657,7 @@ def consultar_tokens(
             conexion.close()
 
 
-@app.post("/pases", status_code=201)
+
 @app.post("/pases", status_code=201)
 def generar_pases(
     _: bool = Depends(verificar_admin),
