@@ -355,6 +355,11 @@ logoutButton.addEventListener("click", async () => {
 // --------------------------------------------------
 // Navegación
 // --------------------------------------------------
+
+// --------------------------------------------------
+// Navegación
+// --------------------------------------------------
+
 document.addEventListener("click", (event) => {
     const objetivo = event.target;
 
@@ -373,20 +378,24 @@ document.addEventListener("click", (event) => {
     if (modulo === "responsables") {
         mostrarResponsables();
     }
+
     if (modulo === "invitados") {
-    mostrarInvitados();
+        mostrarInvitados();
     }
+
     if (modulo === "enlaces") {
-    mostrarEnlaces();
+        mostrarEnlaces();
     }
+
     if (modulo === "confirmaciones") {
-    mostrarConfirmaciones();
+        mostrarConfirmaciones();
+    }
 
     if (modulo === "invitaciones") {
-    mostrarInvitaciones();
-}
-}
+        mostrarInvitaciones();
+    }
 });
+
 document.getElementById("back-home-invitaciones").addEventListener(
     "click",
     mostrarInicio
