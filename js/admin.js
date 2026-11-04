@@ -123,14 +123,8 @@ const generarPasesButton = document.getElementById(
     "generar-pases-button"
 );
 
-const invitacionesMessage = document.getElementById(
-    "invitaciones-message"
-);
-
-const pasesTableBody = document.getElementById(
-    "pases-table-body"
-);
-
+const invitacionesMessage = document.getElementById("invitaciones-message");
+const pasesTableBody = document.getElementById("pases-table-body");
 const pasesGenerados = document.getElementById(
     "pases-generados"
 );

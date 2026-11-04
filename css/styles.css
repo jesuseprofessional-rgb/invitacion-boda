@@ -2008,3 +2008,81 @@ body {
 .rsvp-guest-status {
     font-weight: 600;
 }
+
+/* =========================================
+   PASES INDIVIDUALES CON QR
+   ========================================= */
+
+.rsvp-pass {
+    margin-top: 28px;
+    padding: 25px 20px;
+    border: 1px solid rgba(185, 138, 144, 0.65);
+    border-radius: 16px;
+    background: #f8f3f3;
+    color: #722f37;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(35, 20, 25, 0.12);
+}
+
+.rsvp-pass h4 {
+    margin: 0 0 18px;
+    color: #722f37;
+    font-family: var(--heading-font);
+    font-size: 1.8rem;
+    font-weight: normal;
+}
+
+.rsvp-pass-qr {
+    display: block;
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+    margin: 15px auto;
+    padding: 10px;
+    border: 1px solid #eadfe1;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.rsvp-pass-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 15px;
+    padding: 12px 25px;
+    border: 1px solid #722f37;
+    border-radius: 999px;
+    background: #722f37;
+    color: #ffffff;
+    font-family: var(--body-font);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.rsvp-pass-download:hover {
+    background: #8c4650;
+    transform: translateY(-2px);
+}
+
+.rsvp-pass-download:focus-visible {
+    outline: 3px solid #b98a90;
+    outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+    .rsvp-pass {
+        padding: 22px 15px;
+    }
+
+    .rsvp-pass h4 {
+        font-size: 1.6rem;
+    }
+
+    .rsvp-pass-download {
+        width: 100%;
+    }
+}

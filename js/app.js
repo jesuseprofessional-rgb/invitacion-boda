@@ -437,7 +437,9 @@ async function inicializarConfirmacion() {
 
             const acciones = document.createElement("div");
             acciones.className = "rsvp-guest-actions";
-
+            const paseContenedor = document.createElement("div");
+            paseContenedor.className = "rsvp-pass";
+            
             const botonConfirmar = document.createElement("button");
             botonConfirmar.type = "button";
             botonConfirmar.className = "rsvp-button";
@@ -472,6 +474,174 @@ async function inicializarConfirmacion() {
             }
 
             actualizarEstadoVisual(invitado.asistencia);
+           
+            
+async function generarBoletoPNG(token, nombre) {
+
+    await document.fonts.ready;
+
+    const urlPase =
+        `${window.location.origin}/acceso/?token=${encodeURIComponent(token)}`;
+
+    const qrDataURL = await QRCode.toDataURL(urlPase, {
+        width: 320,
+        margin: 2,
+        errorCorrectionLevel: "H"
+    });
+
+    const imagenQR = new Image();
+
+    await new Promise((resolve, reject) => {
+        imagenQR.onload = resolve;
+        imagenQR.onerror = reject;
+        imagenQR.src = qrDataURL;
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 900;
+    canvas.height = 1200;
+
+    const ctx = canvas.getContext("2d");
+
+    // Fondo
+    ctx.fillStyle = "#f8f3f3";
+    ctx.fillRect(0, 0, 900, 1200);
+
+    // Marco exterior
+    ctx.strokeStyle = "#b98a90";
+    ctx.lineWidth = 5;
+    ctx.strokeRect(25, 25, 850, 1150);
+
+    // Encabezado vino
+    ctx.fillStyle = "#722f37";
+    ctx.fillRect(45, 45, 810, 300);
+
+    // Encabezado
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#eadfe1";
+    ctx.font = '22px "Montserrat"';
+    ctx.fillText("INVITACIÓN EXCLUSIVA", 450, 105);
+
+    // Nombres de los novios
+    ctx.fillStyle = "#ffffff";
+    ctx.font = '72px "Cormorant Garamond"';
+    ctx.fillText("Eric & Yolanda", 450, 205);
+
+    ctx.fillStyle = "#eadfe1";
+    ctx.font = '24px "Montserrat"';
+    ctx.fillText("NOS CASAMOS", 450, 270);
+
+    // Título del pase
+    ctx.fillStyle = "#722f37";
+    ctx.font = '48px "Cormorant Garamond"';
+    ctx.fillText("Pase de acceso", 450, 435);
+
+    // Invitado
+    ctx.fillStyle = "#b98a90";
+    ctx.font = '22px "Montserrat"';
+    ctx.fillText("INVITADO", 450, 505);
+
+    ctx.fillStyle = "#722f37";
+    ctx.font = '48px "Cormorant Garamond"';
+    ctx.fillText(nombre, 450, 570, 760);
+
+    // QR
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(275, 620, 350, 350);
+
+    ctx.drawImage(imagenQR, 295, 640, 310, 310);
+
+    // Fecha
+    ctx.fillStyle = "#722f37";
+    ctx.font = '30px "Montserrat"';
+    ctx.fillText("05 · 12 · 2026", 450, 1040);
+
+    // Pie del boleto
+    ctx.fillStyle = "#b98a90";
+    ctx.font = '22px "Montserrat"';
+    ctx.fillText("PASE PERSONAL E INTRANSFERIBLE", 450, 1100);
+
+    ctx.fillStyle = "#722f37";
+    ctx.font = '28px "Parisienne"';
+    ctx.fillText("Eric & Yolanda", 450, 1140);
+
+    // Descargar PNG
+    const enlace = document.createElement("a");
+
+    const nombreArchivo = nombre
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .toLowerCase() || "invitado";
+
+    enlace.download = `pase-${nombreArchivo}.png`;
+    enlace.href = canvas.toDataURL("image/png");
+    enlace.click();
+}
+
+
+async function mostrarPase(token, nombre) {
+
+    paseContenedor.replaceChildren();
+
+    if (!token) return;
+
+    const tituloPase = document.createElement("h4");
+    tituloPase.textContent = "Tu pase de acceso";
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "rsvp-pass-qr";
+
+    const botonDescarga = document.createElement("button");
+    botonDescarga.type = "button";
+    botonDescarga.className = "rsvp-pass-download";
+    botonDescarga.textContent = "Descargar mi pase";
+
+    paseContenedor.append(
+        tituloPase,
+        canvas,
+        botonDescarga
+    );
+
+    try {
+
+        const urlPase =
+            `${window.location.origin}/acceso/?token=${encodeURIComponent(token)}`;
+
+        await QRCode.toCanvas(canvas, urlPase, {
+            width: 220,
+            margin: 2,
+            errorCorrectionLevel: "H"
+        });
+
+        botonDescarga.addEventListener("click", async () => {
+
+            botonDescarga.disabled = true;
+            botonDescarga.textContent = "Preparando boleto...";
+
+            try {
+                await generarBoletoPNG(token, nombre);
+
+            } catch (err) {
+                console.error("Error al descargar el pase:", err);
+                estado.textContent =
+                    "No fue posible generar el boleto. Inténtalo nuevamente.";
+
+            } finally {
+                botonDescarga.disabled = false;
+                botonDescarga.textContent = "Descargar mi pase";
+            }
+        });
+
+    } catch (err) {
+
+        paseContenedor.textContent =
+            "No fue posible generar tu código QR. Recarga la invitación.";
+
+        console.error("Error al generar el QR:", err);
+    }
+}
 
             async function guardarAsistencia(asistencia) {
 
@@ -505,15 +675,28 @@ async function inicializarConfirmacion() {
                     }
 
                     if (!respuesta.ok) {
-                        throw new Error(
-                            "No se pudo guardar tu respuesta. Inténtalo nuevamente."
-                        );
-                    }
+    throw new Error(
+        "No se pudo guardar tu respuesta. Inténtalo nuevamente."
+    );
+}
+
+const resultado = await respuesta.json();
 
                     invitado.asistencia = asistencia;
 
                     actualizarEstadoVisual(asistencia);
+                    if (
+    asistencia === "CONFIRMADO" &&
+    resultado.pase &&
+    resultado.pase.pase_token
+) {
+    invitado.pase_token = resultado.pase.pase_token;
+    await mostrarPase(invitado.pase_token, invitado.nombre);
 
+} else {
+    invitado.pase_token = null;
+    paseContenedor.replaceChildren();
+}
                     estado.textContent =
                         "Respuesta guardada correctamente para " +
                         invitado.nombre + ".";
@@ -545,11 +728,17 @@ async function inicializarConfirmacion() {
             acciones.append(botonConfirmar, botonDeclinar);
 
             tarjeta.append(
-                nombre,
-                respuestaActual,
-                acciones
-            );
-
+    nombre,
+    respuestaActual,
+    acciones,
+    paseContenedor
+);
+            if (
+    invitado.asistencia === "CONFIRMADO" &&
+    invitado.pase_token
+) {
+    mostrarPase(invitado.pase_token, invitado.nombre);
+}
             contenedor.appendChild(tarjeta);
         });
 
